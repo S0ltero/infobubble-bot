@@ -1,0 +1,24 @@
+{
+  "apps": [
+    {
+      "name": "info-admin",
+      "args": "runserver 0:8007",
+      "script": "manage.py",
+      "exec_mode": "fork",
+      "exec_interpreter": "env/bin/python"
+    },
+    {
+      "name": "info-bot",
+      "script": "bot/bot.py",
+      "exec_mode": "fork",
+      "exec_interpreter": "env/bin/python"
+    },
+    {
+      "name": "grabber-bot",
+      "script": "bot/grabber_bot2.py",
+      "exec_mode": "fork",
+      "exec_interpreter": "env/bin/python"
+    }
+
+  ]
+}
