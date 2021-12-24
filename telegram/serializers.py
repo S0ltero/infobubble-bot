@@ -1,7 +1,4 @@
-from django.contrib.auth import authenticate
-from django.utils import timezone
 from rest_framework import serializers
-
 
 from .models import (
     TelegramUser
