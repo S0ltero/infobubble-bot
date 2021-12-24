@@ -69,27 +69,24 @@ class UserView(APIView):
 
 
 class ChannelView(APIView):
+    queryset = TelegramChannel
 
     def post(self, request):
         data = request.data
 
         if not validate_token(data['token']):
-            return Response(status=404)
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
 
         if not data.get('tags'):
-            channels = TelegramChannel.objects.all()
-            channels = tuple(x.channel_id for x in channels)
+            channel_ids = self.queryset.objects.values_list("channel_id", flat=True)
         else:
             tags = data['tags']
-            channels = TelegramChannel.objects.filter(tags__overlap=tags)
-            channels = tuple(x.channel_id for x in channels)
+            channel_ids = TelegramChannel.objects.filter(tags__overlap=tags).values_list("channel_id", flat=True)
 
-        if channels:
-            return Response({
-                'channels_ids': channels
-            })
+        if channel_ids:
+            return Response({'channels_ids': channel_ids}, status=status.HTTP_200_OK)
         else:
-            return Response(status=204)
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
 
 class HistoryMessageView(APIView):
