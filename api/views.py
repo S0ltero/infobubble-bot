@@ -26,15 +26,15 @@ class UserView(APIView):
 
     def get(self, request):
         try:
-            node = self.queryset.objects.all()
-        except Link.DoesNotExist:
+            users = self.queryset.objects.all()
+        except TelegramUser.DoesNotExist:
             return Response(
-                data={"description": "Ячейки не найдены", 
-                      "error": "node_not_found"}, 
-                status=404)
+                data={"description": "Пользователи не найдены", 
+                      "error": "users_not_found"}, 
+                status=status.HTTP_404_NOT_FOUND)
 
-        serializer = self.serializer_class(node, many=True)
-        return Response(serializer.data, status=200)
+        serializer = self.serializer_class(users, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
         data = request.data
