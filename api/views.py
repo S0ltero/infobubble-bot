@@ -40,27 +40,32 @@ class UserView(APIView):
         data = request.data
 
         if not validate_token(data['token']):
-            return Response(status=404)
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+        serializer = self.serializer_class(data=data)
+        if serializer.is_valid(raise_exception=False):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request):
+        data = request.data
 
         try:
-            user = TelegramUser.objects.get(user_id=data.get('user_id'))
+            user = TelegramUser.objects.get(pk=data["user_id"])
         except TelegramUser.DoesNotExist:
-            if data.get('user_id') and data.get('filters'):
-                user = TelegramUser()
-                user.user_id = data['user_id']
-                user.filters = data['filters']
-            else:
-                return Response(status=204)
-
-        if data.get('filters'):
-            user.filters = data.get('filters')
-            user.save()
-            return Response(status=200)
+            return Response(
+                data={"description": "Пользователь не найден", 
+                      "error": "user_not_found"},
+                status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = self.serializer_class(instance=user, data=data, partial=True)
+        if serializer.is_valid(raise_exception=False):
+            serializer.update(user, serializer.validated_data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         else:
-            return Response({
-                'user_id': user.id,
-                'filters': user.filters
-            })
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ChannelView(APIView):
