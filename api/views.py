@@ -7,7 +7,9 @@ from pathlib import Path
 from telegram.models import TelegramChannel, TelegramUser, HistoryMessage, UserMessageRate
 
 from telegram.serializers import (
-    TelegramUserSerializer
+    TelegramUserSerializer,
+    HistoryMessageSerializer,
+    UserMessageRateSerializer
 )
 
 
