@@ -107,27 +107,17 @@ class HistoryMessageView(APIView):
 
 
 class UserRateView(APIView):
+    serializer_class = UserMessageRateSerializer
 
     def post(self, request):
         data = request.data
 
         if not validate_token(data['token']):
-            return Response(status=404)
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
 
-        message_id = data.get('message_id')
-        channel_id = data.get('channel_id')
-        user_id = data.get('user_id')
-        rate = data.get('rate')
-
-        channel = TelegramChannel.objects.get(channel_id=channel_id)
-        user = TelegramUser.objects.get(user_id=user_id)
-
-        user_rate = UserMessageRate()
-        user_rate.message_id = message_id
-        user_rate.channel_id = channel
-        user_rate.user_id = user
-        user_rate.rate = rate
-
-        user_rate.save()
-
-        return Response(status=200)
+        serializer = self.serializer_class(data=data)
+        if serializer.is_valid(raise_exception=False):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
