@@ -1,11 +1,12 @@
 import os
 import json
+from pathlib import Path
+
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
 
-from telegram.models import TelegramChannel, TelegramUser, HistoryMessage, UserMessageRate
-
+from telegram.models import TelegramChannel, TelegramUser
 from telegram.serializers import (
     TelegramUserSerializer,
     HistoryMessageSerializer,
