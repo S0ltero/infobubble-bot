@@ -299,10 +299,10 @@ def day_send_news(user_id):
 
 def day_news():
     response = requests.get(url=f'{URL}/api/users/')
-    user_id = response.json()
-    for user in user_id:
-        print(user['user_id'])
+    users = response.json()
+    for user in users:
         day_send_news(user['user_id'])
+
 
 @bot.callback_query_handler(func=lambda call: call.data == 'changefilters')
 def change_filters_click_inline(call):
