@@ -29,14 +29,8 @@ def start(message):
     user_id = message.from_user.id
 
     # Проверяем проходил ли пользователь настройку
-    data = {
-        'token': API_TOKEN,
-        'user_id': user_id
-    }
-    print("SDDSSD")
-    responce = requests.post(url=f'{URL}/api/users/', json=data)
-    print(responce)
-    if responce.status_code == 200:
+    response = requests.get(url=f'{URL}/api/user/{user_id}')
+    if response.status_code == 200:
         text = ('Вы уже проходили настройку!\nДля изменения категорий воспользуйтесь командой: /changefilters')
         bot.send_message(message.chat.id, text)
         send_news(message)
