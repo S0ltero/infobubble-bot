@@ -18,16 +18,16 @@ class UserView(APIView):
     queryset = TelegramUser
     serializer_class = TelegramUserSerializer
 
-    def get(self, request):
+    def get(self, request, pk):
         try:
-            users = self.queryset.objects.all()
+            user = self.queryset.objects.get(pk=pk)
         except TelegramUser.DoesNotExist:
             return Response(
-                data={"description": "Пользователи не найдены", 
-                      "error": "users_not_found"}, 
+                data={"description": "Пользователь не найден", 
+                      "error": "user_not_found"}, 
                 status=status.HTTP_404_NOT_FOUND)
 
-        serializer = self.serializer_class(users, many=True)
+        serializer = self.serializer_class(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
