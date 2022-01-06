@@ -319,7 +319,7 @@ def change_filters_click_inline(call):
         'user_id': user_id,
         'filters': user_filters[user_id]
     }
-    responce = requests.post(url=f'{URL}/api/users/', json=data)
+    response = requests.put(url=f'{URL}/api/user/', json=data)
 
     bot.answer_callback_query(call.id, text='Категории успешно изменены!')
     bot.delete_message(chat_id, message_id)
