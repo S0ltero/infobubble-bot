@@ -147,7 +147,7 @@ def send_news(message):
     response = requests.post(url=f'{URL}/api/channels/', json=data)
     if response.status_code == 204:
         return print(f'Каналы с следующими фильтрами не найдены: {", ".join(tags)}')
-    channels = responce.json()['channels_ids']
+    channels = response.json()['channels_ids']
     markup = types.InlineKeyboardMarkup(row_width=2)
     markup.add(types.InlineKeyboardButton('❤️', callback_data='like'))
     markup.add(types.InlineKeyboardButton('👎', callback_data='nolike'))
@@ -179,7 +179,7 @@ def ozenka(call):
         'channel_id': channel_id,
         'rate': True
     }
-    responce = requests.post(url=f'{URL}/api/rate/', json=data)
+    response = requests.post(url=f'{URL}/api/rate/', json=data)
     send_news(call)
 
 @bot.callback_query_handler(func=lambda call: call.data == 'nolike')
@@ -193,7 +193,7 @@ def ozenka_nolike(call):
         'channel_id': channel_id,
         'rate': False
     }
-    responce = requests.post(url=f'{URL}/api/rate/', json=data)
+    response = requests.post(url=f'{URL}/api/rate/', json=data)
     send_news(call)
 
 @bot.callback_query_handler(func=lambda call: call.data == 'next')
@@ -221,7 +221,7 @@ def change_filters(message):
         bot.send_message(chat_id=chat_id, text='Вы ещё не проходили настройку! Воспользуйтесь командой /start')
         return
 
-    existing_filters = responce.json()['filters']
+    existing_filters = response.json()['filters']
     user_filters[user_id] = existing_filters
 
     markup = types.InlineKeyboardMarkup()
@@ -251,7 +251,7 @@ def day_send_news(user_id):
     response = requests.post(url=f'{URL}/api/channels/', json=data)
     if response.status_code == 204:
         return print(f'Каналы с следующими фильтрами не найдены: {", ".join(tags)}')
-    channels = responce.json()['channels_ids']
+    channels = response.json()['channels_ids']
     markup = types.InlineKeyboardMarkup(row_width=2)
     markup.add(types.InlineKeyboardButton('❤️', callback_data='like'))
     markup.add(types.InlineKeyboardButton('👎', callback_data='nolike'))
@@ -287,7 +287,7 @@ def change_filters_click_inline(call):
     message_id = call.message.id
 
     if not user_filters.get(user_id):
-        bot.answer_callback_query(call.id, 'Вам необходима выбрать хотя бы одну категорию!')
+        bot.answer_callback_query(call.id, 'Вам необходимо выбрать хотя бы одну категорию!')
         return
 
     data = {
