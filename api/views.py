@@ -14,13 +14,6 @@ from telegram.serializers import (
 )
 
 
-def validate_token(token):
-    home = Path(__file__).resolve().parent.parent
-    with open(os.path.join(home, 'local', 'config.json')) as file:
-        config = json.load(file)
-    return token == config.get('token')
-
-
 class UserView(APIView):
     queryset = TelegramUser
     serializer_class = TelegramUserSerializer
@@ -39,9 +32,6 @@ class UserView(APIView):
 
     def post(self, request):
         data = request.data
-
-        if not validate_token(data['token']):
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
 
         serializer = self.serializer_class(data=data)
         if serializer.is_valid(raise_exception=False):
@@ -75,9 +65,6 @@ class ChannelView(APIView):
     def post(self, request):
         data = request.data
 
-        if not validate_token(data['token']):
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-
         if not data.get('tags'):
             channel_ids = self.queryset.objects.values_list("channel_id", flat=True)
         else:
@@ -96,9 +83,6 @@ class HistoryMessageView(APIView):
     def post(self, request):
         data = request.data
 
-        if not validate_token(data['token']):
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-
         serializer = self.serializer_class(data=data)
         if serializer.is_valid(raise_exception=False):
             serializer.save()
@@ -112,9 +96,6 @@ class UserRateView(APIView):
 
     def post(self, request):
         data = request.data
-
-        if not validate_token(data['token']):
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
 
         serializer = self.serializer_class(data=data)
         if serializer.is_valid(raise_exception=False):
