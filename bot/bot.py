@@ -81,8 +81,6 @@ def filter_click_inline(call):
 
     markup = call.message.reply_markup
     for i, row in enumerate(markup.keyboard):
-        print(row)
-        print(i)
         l = 0
         try:
             filter_button = next(btn for btn in row if btn.callback_data == choosen_filter)
@@ -98,7 +96,6 @@ def filter_click_inline(call):
                         filter_button.text = f'{choosen_filter} ❎'
                     row[l]=filter_button
                 l+=1
-            print(markup.keyboard[i])
             markup.keyboard[i] = row
             break
 
