@@ -144,21 +144,13 @@ def send_news(message):
     user_id = message.from_user.id
 
     # Получаем фильтры пользователя
-    data = {
-        'token': API_TOKEN,
-        'user_id': user_id
-    }
-    responce = requests.post(url=f'{URL}/api/users/', json=data)
-    tags = responce.json()['filters']
-    print(tags)
+
+    response = requests.post(url=f'{URL}/api/user/{user_id}')
+    tags = response.json()['filters']
     # Получаем id каналов
-    data = {
-        'token': API_TOKEN,
-        'tags': tags
-    }
-    responce = requests.post(url=f'{URL}/api/channels/', json=data)
-    print(responce.text)
-    if responce.status_code == 204:
+    data = {'tags': tags}
+    response = requests.post(url=f'{URL}/api/channels/', json=data)
+    if response.status_code == 204:
         return print(f'Каналы с следующими фильтрами не найдены: {", ".join(tags)}')
     channels = responce.json()['channels_ids']
     markup = types.InlineKeyboardMarkup(row_width=2)
