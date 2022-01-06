@@ -56,6 +56,23 @@ class UserView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class UserListView(ListAPIView):
+    queryset = TelegramUser
+    serializer_class = TelegramUserSerializer
+
+    def get(self, request, *args, **kwargs):
+        try:
+            users = TelegramUser.objects.all()
+        except TelegramUser.DoesNotExist:
+            return Response(
+                data={"description": "Пользователи не найдены", 
+                      "error": "users_not_found"},
+                status=status.HTTP_404_NOT_FOUND)
+
+        serializer = self.serializer_class(users, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 class ChannelView(APIView):
     queryset = TelegramChannel
 
