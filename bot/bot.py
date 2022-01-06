@@ -131,13 +131,17 @@ def complete_click_inline(call):
         'user_id': user_id,
         'filters': user_filters[user_id]
     }
-    responce = requests.post(url=f'{URL}/api/users/', json=data)
-
-    bot.answer_callback_query(call.id, 'Настройка завершена!')
-    bot.delete_message(chat_id, message_id)
-    text = '''Отлично, информационные фильтры заданы! Так я буду лучше понимать тебя. Теперь, я буду присылать тебе посты, а ты их оценивать, я присылать, а ты оценивать, я присылать... и так далее. Если возникнут проблемы, ты всегда можешь заручиться моей поддержкой, написав /help'''
-    bot.send_message(call.from_user.id, text)
-    send_news(call)
+    response = requests.post(url=f'{URL}/api/user/', json=data)
+    if response.status_code == 201:
+        bot.answer_callback_query(call.id, 'Настройка завершена!')
+        bot.delete_message(chat_id, message_id)
+        text = (
+            'Отлично, информационные фильтры заданы! Так я буду лучше понимать тебя. '
+            'Теперь, я буду присылать тебе посты, а ты их оценивать, я присылать, а ты оценивать, я присылать... и так далее. '
+            'Если возникнут проблемы, ты всегда можешь заручиться моей поддержкой, написав /help'
+        )
+        bot.send_message(call.from_user.id, text)
+        send_news(call)
 
 
 def send_news(message):
