@@ -212,12 +212,8 @@ def change_filters(message):
     chat_id = message.chat.id
 
     # Получаем фильтры пользователя
-    data = {
-        'token': API_TOKEN,
-        'user_id': user_id
-    }
-    responce = requests.post(url=f'{URL}/api/users/', json=data)
-    if responce.status_code == 204:
+    response = requests.get(url=f'{URL}/api/user/{user_id}')
+    if response.status_code == 400:
         bot.send_message(chat_id=chat_id, text='Вы ещё не проходили настройку! Воспользуйтесь командой /start')
         return
 
