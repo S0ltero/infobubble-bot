@@ -243,13 +243,9 @@ def change_filters(message):
     bot.send_message(chat_id, 'Измените категории', reply_markup=markup)
 
 def day_send_news(user_id):
-    data = {
-        'token': API_TOKEN,
-        'user_id': user_id
-    }
-    responce = requests.post(url=f'{URL}/api/users/', json=data)
-    tags = responce.json()['filters']
-    print(tags)
+    response = requests.get(url=f'{URL}/api/user/{user_id}')
+    tags = response.json()['filters']
+
     # Получаем id каналов
     data = {
         'token': API_TOKEN,
