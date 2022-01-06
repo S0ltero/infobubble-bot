@@ -128,7 +128,6 @@ def complete_click_inline(call):
         return
 
     data = {
-        'token': API_TOKEN,
         'user_id': user_id,
         'filters': user_filters[user_id]
     }
@@ -188,7 +187,6 @@ def ozenka(call):
     message_id = call.message.id
     channel_id = "nexta_live"
     data = {
-        'token': API_TOKEN,
         'user_id': user_id,
         'message_id':message_id,
         'channel_id': channel_id,
@@ -203,7 +201,6 @@ def ozenka_nolike(call):
     message_id = call.message.id
     channel_id = "nexta_live"
     data = {
-        'token': API_TOKEN,
         'user_id': user_id,
         'message_id':message_id,
         'channel_id': channel_id,
@@ -315,7 +312,6 @@ def change_filters_click_inline(call):
         return
 
     data = {
-        'token': API_TOKEN,
         'user_id': user_id,
         'filters': user_filters[user_id]
     }
