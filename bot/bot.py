@@ -294,8 +294,9 @@ def change_filters_click_inline(call):
 
     bot.answer_callback_query(call.id, text='Категории успешно изменены!')
     bot.delete_message(chat_id, message_id)
-    
+
     send_news(call)
+
 
 @bot.message_handler(content_types=["text"])
 def change_filters_click_inline(message):
@@ -306,6 +307,7 @@ def change_filters_click_inline(message):
     user_id = message.from_user.id
     if message.text != "Получить новости" and message.text != "Изменить фильтры":
         bot.send_message(user_id,"Сейчас я отправляю новости, а возможно завтра захватываю мир :)",reply_markup=markup_button)
+
 
 day_news()
 bot.polling()
