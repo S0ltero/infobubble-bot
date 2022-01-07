@@ -183,7 +183,7 @@ def on_like(call):
     send_news(call)
 
 @bot.callback_query_handler(func=lambda call: call.data == 'nolike')
-def ozenka_nolike(call):
+def on_nolike(call):
     user_id = call.from_user.id
     message_id = call.message.id
     channel_id = "nexta_live"
