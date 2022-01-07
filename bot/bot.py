@@ -1,12 +1,11 @@
 import configparser
 import requests
-import pprint
-
-from telebot import TeleBot
-from telebot import types
 import json
 from random import randint
 from os import path
+
+from telebot import TeleBot
+from telebot import types
 
 config = configparser.ConfigParser()
 config.read(path.join(path.dirname(path.abspath(__file__)), 'config.ini'))
