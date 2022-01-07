@@ -140,7 +140,7 @@ def send_news(message):
 
     # Получаем фильтры пользователя
 
-    response = requests.post(url=f'{URL}/api/user/{user_id}')
+    response = requests.get(url=f'{URL}/api/user/{user_id}')
     tags = response.json()['filters']
     # Получаем id каналов
     data = {'tags': tags}
