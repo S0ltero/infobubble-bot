@@ -306,6 +306,9 @@ def day_send_news(user_id):
 
 def day_news():
     response = requests.get(url=f'{URL}/api/users/')
+    if response.status_code == 404:
+        return print("Пользователи не найдены")
+
     users = response.json()
     for user in users:
         day_send_news(user['user_id'])
