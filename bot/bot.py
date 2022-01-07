@@ -240,6 +240,8 @@ def change_filters(message):
 
 def day_send_news(user_id):
     response = requests.get(url=f'{URL}/api/user/{user_id}')
+    if response.status_code == 404:
+        return "Пользователь не найден"
     tags = response.json()['filters']
 
     # Получаем id каналов
