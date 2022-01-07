@@ -293,12 +293,9 @@ def day_send_news(user_id):
     try:
         with open(path.join(path.dirname(path.abspath(__file__)),channels[randint(0,len(channels))]+str(randint(0,4))+'.json'), 'r', encoding='utf-8') as fh: #открываем файл на чтение
             data = json.load(fh)
-            print(data)
             if data["filename"] == "None":
                 bot.send_message(user_id, data['text'], reply_markup=markup)
             else:
-                print( data['filename'])
-                print(path.join(path.dirname(path.abspath(__file__)), data['filename']))
                 if path.join(path.dirname(path.abspath(__file__)), data['filename'])[-4:] == ".mp4":
                     bot.send_video(user_id,open(path.join(path.dirname(path.abspath(__file__)), data['filename']), 'rb'), caption=data['text'], reply_markup=markup)           
                 else:
