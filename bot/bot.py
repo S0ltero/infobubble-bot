@@ -20,7 +20,7 @@ user_filters = {}
 markup_button = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
 itembtn1 = types.KeyboardButton('Изменить фильтры')
 itembtn2 = types.KeyboardButton('Получить новости')
-markup_button.add(itembtn1,itembtn2 )
+markup_button.add(itembtn1, itembtn2)
 
 
 @bot.message_handler(commands=['start'])
