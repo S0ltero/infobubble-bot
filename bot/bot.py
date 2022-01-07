@@ -145,7 +145,7 @@ def send_news(message):
     # Получаем id каналов
     data = {'tags': tags}
     response = requests.post(url=f'{URL}/api/channels/', json=data)
-    if response.status_code == 204:
+    if response.status_code == 404:
         return print(f'Каналы с следующими фильтрами не найдены: {", ".join(tags)}')
     channels = response.json()['channels_ids']
     markup = types.InlineKeyboardMarkup(row_width=2)
@@ -213,7 +213,7 @@ def change_filters(message):
 
     # Получаем фильтры пользователя
     response = requests.get(url=f'{URL}/api/user/{user_id}')
-    if response.status_code == 400:
+    if response.status_code == 404:
         bot.send_message(chat_id=chat_id, text='Вы ещё не проходили настройку! Воспользуйтесь командой /start')
         return
 
