@@ -6,6 +6,7 @@ from os import path
 
 from telebot.async_telebot import AsyncTeleBot
 from telebot import types
+from loguru import logger
 
 config = configparser.ConfigParser()
 config.read(path.join(path.dirname(path.abspath(__file__)), 'config.ini'))
@@ -144,7 +145,7 @@ async def send_news(message):
     data = {'tags': tags}
     response = requests.post(url=f'{URL}/api/channels/', json=data)
     if response.status_code == 404:
-        return print(f'Каналы с следующими фильтрами не найдены: {", ".join(tags)}')
+        return logger.error(f'Каналы с следующими фильтрами не найдены: {", ".join(tags)}')
     channels = response.json()['channels_ids']
     markup = types.InlineKeyboardMarkup(row_width=2)
     markup.add(types.InlineKeyboardButton('❤️', callback_data='like'))
@@ -268,14 +269,14 @@ async def change_filters_click_inline(message):
 async def day_send_news(user_id):
     response = requests.get(url=f'{URL}/api/user/{user_id}')
     if response.status_code == 404:
-        return print("Пользователь не найден")
+        return logger.error("Пользователь не найден")
     tags = response.json()['filters']
 
     # Получаем id каналов
     data = {'tags': tags}
     response = requests.post(url=f'{URL}/api/channels/', json=data)
     if response.status_code == 404:
-        return print(f'Каналы с следующими фильтрами не найдены: {", ".join(tags)}')
+        return logger.error(f'Каналы с следующими фильтрами не найдены: {", ".join(tags)}')
     channels = response.json()['channels_ids']
 
     markup = types.InlineKeyboardMarkup(row_width=2)
@@ -300,7 +301,7 @@ async def day_send_news(user_id):
 async def day_news():
     response = requests.get(url=f'{URL}/api/users/')
     if response.status_code == 404:
-        return print("Пользователи не найдены")
+        return logger.error("Пользователи не найдены")
 
     users = response.json()
     for user in users:
