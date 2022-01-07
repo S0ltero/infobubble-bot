@@ -238,6 +238,40 @@ def change_filters(message):
 
     bot.send_message(chat_id, 'Измените категории', reply_markup=markup)
 
+
+@bot.callback_query_handler(func=lambda call: call.data == 'changefilters')
+def change_filters_click_inline(call):
+    user_id = call.from_user.id
+    chat_id = call.message.chat.id
+    message_id = call.message.id
+
+    if not user_filters.get(user_id):
+        bot.answer_callback_query(call.id, 'Вам необходимо выбрать хотя бы одну категорию!')
+        return
+
+    data = {
+        'user_id': user_id,
+        'filters': user_filters[user_id]
+    }
+    response = requests.put(url=f'{URL}/api/user/', json=data)
+
+    bot.answer_callback_query(call.id, text='Категории успешно изменены!')
+    bot.delete_message(chat_id, message_id)
+
+    send_news(call)
+
+
+@bot.message_handler(content_types=["text"])
+def change_filters_click_inline(message):
+    if message.text == "Изменить фильтры":
+        change_filters(message)
+    if message.text == "Получить новости":
+        send_new(message)
+    user_id = message.from_user.id
+    if message.text != "Получить новости" and message.text != "Изменить фильтры":
+        bot.send_message(user_id,"Сейчас я отправляю новости, а возможно завтра захватываю мир :)",reply_markup=markup_button)
+
+
 def day_send_news(user_id):
     response = requests.get(url=f'{URL}/api/user/{user_id}')
     if response.status_code == 404:
@@ -276,39 +310,6 @@ def day_news():
     users = response.json()
     for user in users:
         day_send_news(user['user_id'])
-
-
-@bot.callback_query_handler(func=lambda call: call.data == 'changefilters')
-def change_filters_click_inline(call):
-    user_id = call.from_user.id
-    chat_id = call.message.chat.id
-    message_id = call.message.id
-
-    if not user_filters.get(user_id):
-        bot.answer_callback_query(call.id, 'Вам необходимо выбрать хотя бы одну категорию!')
-        return
-
-    data = {
-        'user_id': user_id,
-        'filters': user_filters[user_id]
-    }
-    response = requests.put(url=f'{URL}/api/user/', json=data)
-
-    bot.answer_callback_query(call.id, text='Категории успешно изменены!')
-    bot.delete_message(chat_id, message_id)
-
-    send_news(call)
-
-
-@bot.message_handler(content_types=["text"])
-def change_filters_click_inline(message):
-    if message.text == "Изменить фильтры":
-        change_filters(message)
-    if message.text == "Получить новости":
-        send_new(message)
-    user_id = message.from_user.id
-    if message.text != "Получить новости" and message.text != "Изменить фильтры":
-        bot.send_message(user_id,"Сейчас я отправляю новости, а возможно завтра захватываю мир :)",reply_markup=markup_button)
 
 
 day_news()
