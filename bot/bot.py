@@ -281,7 +281,7 @@ def day_send_news(user_id):
     # Получаем id каналов
     data = {'tags': tags}
     response = requests.post(url=f'{URL}/api/channels/', json=data)
-    if response.status_code == 204:
+    if response.status_code == 404:
         return print(f'Каналы с следующими фильтрами не найдены: {", ".join(tags)}')
     channels = response.json()['channels_ids']
     markup = types.InlineKeyboardMarkup(row_width=2)
