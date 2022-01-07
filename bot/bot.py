@@ -169,7 +169,7 @@ def send_news(message):
         send_news(message)
 
 @bot.callback_query_handler(func=lambda call: call.data == 'like')
-def ozenka(call):
+def on_like(call):
     user_id = call.from_user.id
     message_id = call.message.id
     channel_id = "nexta_live"
