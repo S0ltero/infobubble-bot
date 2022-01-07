@@ -33,7 +33,7 @@ def start(message):
     if response.status_code == 200:
         text = ('Вы уже проходили настройку!\nДля изменения категорий воспользуйтесь командой: /changefilters')
         bot.send_message(message.chat.id, text)
-        send_news(message)
+        return send_news(message)
 
     # Инициализируем настройку
     markup = types.InlineKeyboardMarkup(row_width=3)
