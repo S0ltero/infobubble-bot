@@ -284,10 +284,12 @@ def day_send_news(user_id):
     if response.status_code == 404:
         return print(f'Каналы с следующими фильтрами не найдены: {", ".join(tags)}')
     channels = response.json()['channels_ids']
+
     markup = types.InlineKeyboardMarkup(row_width=2)
     markup.add(types.InlineKeyboardButton('❤️', callback_data='like'))
     markup.add(types.InlineKeyboardButton('👎', callback_data='nolike'))
     markup.add(types.InlineKeyboardButton('Далее', callback_data='next'))
+
     try:
         with open(path.join(path.dirname(path.abspath(__file__)),channels[randint(0,len(channels))]+str(randint(0,4))+'.json'), 'r', encoding='utf-8') as fh: #открываем файл на чтение
             data = json.load(fh)
