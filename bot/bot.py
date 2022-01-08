@@ -178,11 +178,11 @@ async def send_news(message):
     except:
         await send_news(message)
 
-@bot.callback_query_handler(func=lambda call: call.data == 'like')
+@bot.callback_query_handler(func=lambda call: call.data.startswith('like'))
 async def on_like(call):
     user_id = call.from_user.id
     message_id = call.message.id
-    channel_id = "nexta_live"
+    channel_id = call.data.split('_')[1]
     data = {
         'user_id': user_id,
         'message_id':message_id,
@@ -198,11 +198,11 @@ async def on_like(call):
                 return logger.error(await response.text())
 
 
-@bot.callback_query_handler(func=lambda call: call.data == 'nolike')
+@bot.callback_query_handler(func=lambda call: call.data.startswith('nolike'))
 async def on_nolike(call):
     user_id = call.from_user.id
     message_id = call.message.id
-    channel_id = "nexta_live"
+    channel_id = call.data.split('_')[1]
     data = {
         'user_id': user_id,
         'message_id':message_id,
