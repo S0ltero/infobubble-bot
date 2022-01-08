@@ -283,7 +283,7 @@ async def change_filters_click_inline(message):
         await send_new(message)
     user_id = message.from_user.id
     if message.text != "Получить новости" and message.text != "Изменить фильтры":
-        await bot.send_message(user_id,"Сейчас я отправляю новости, а возможно завтра захватываю мир :)",reply_markup=markup_button)
+        await bot.send_message(user_id,"Сейчас я отправляю новости, а возможно завтра захватываю мир :)", reply_markup=markup_button)
 
 
 async def send_news(user):
