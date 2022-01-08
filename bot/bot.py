@@ -124,7 +124,7 @@ async def complete_click_inline(call):
     }
 
     async with aiohttp.ClientSession() as session:
-        async with session.post(url=f'{URL}/api/user/', data=data) as response:
+        async with session.post(url=f'{URL}/api/user/', json=data) as response:
             if response.status == 201:
                 await bot.answer_callback_query(call.id, 'Настройка завершена!')
                 await bot.delete_message(chat_id, message_id)
@@ -153,7 +153,7 @@ async def send_news(message):
     # Получаем id каналов
     data = {'tags': tags}
     async with aiohttp.ClientSession() as session:
-        async with session.post(url=f'{URL}/api/channels/', data=data) as response:
+        async with session.post(url=f'{URL}/api/channels/', json=data) as response:
             if response.status == 200:
                 channels = (await response.json())['channels_ids']
             elif response.status == 404:
@@ -191,7 +191,7 @@ async def on_like(call):
     }
 
     async with aiohttp.ClientSession() as session:
-        async with session.post(url=f'{URL}/api/rate/', data=data) as response:
+        async with session.post(url=f'{URL}/api/rate/', json=data) as response:
             if response.status == 201:
                 await send_news(call)
             else:
@@ -211,7 +211,7 @@ async def on_nolike(call):
     }
 
     async with aiohttp.ClientSession() as session:
-        async with session.post(url=f'{URL}/api/rate/', data=data) as response:
+        async with session.post(url=f'{URL}/api/rate/', json=data) as response:
             if response.status == 201:
                 await send_news(call)
             else:
@@ -283,7 +283,7 @@ async def change_filters_click_inline(call):
     }
 
     async with aiohttp.ClientSession() as session:
-        async with session.put(url=f'{URL}/api/user/', data=data) as response:
+        async with session.put(url=f'{URL}/api/user/', json=data) as response:
             if response.status != 200:
                 return logger.error(await response.text())
 
@@ -318,7 +318,7 @@ async def day_send_news(user_id):
     # Получаем id каналов
     data = {'tags': tags}
     async with aiohttp.ClientSession() as session:
-        async with session.post(url=f'{URL}/api/channels/', data=data) as response:
+        async with session.post(url=f'{URL}/api/channels/', json=data) as response:
             if response.status == 200:
                 channels = (await response.json())['channels_ids']
             elif response.status == 404:
