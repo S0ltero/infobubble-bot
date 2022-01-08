@@ -301,24 +301,52 @@ async def send_news(user):
             else:
                 return logger.error(await response.text())
 
-    markup = types.InlineKeyboardMarkup(row_width=2)
-    markup.add(types.InlineKeyboardButton('❤️', callback_data='like'))
-    markup.add(types.InlineKeyboardButton('👎', callback_data='nolike'))
-    markup.add(types.InlineKeyboardButton('Далее', callback_data='next'))
+    channel = random.choice(channels)
+    channels_dir = path.join(path.dirname(path.abspath(__file__)), "channels_dump")
+    channel_file = f"{channel}{random.randint(0, 4)}.json"
+
+    if not os.path.exists(path.join(channels_dir, channel_file)):
+        return
 
     try:
-        with open(path.join(path.dirname(path.abspath(__file__)),channels[randint(0,len(channels))]+str(randint(0,4))+'.json'), 'r', encoding='utf-8') as fh: #открываем файл на чтение
+        with open(path.join(channels_dir, channel_file), 'r', encoding='utf-8') as fh:
             data = json.load(fh)
+
+            # Проверяем отправлялась ли новость раньше
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url=f'{URL}/api/history/{user_id}/{channel}/{data["message_id"]}') as response:
+                    if response.status == 200:
+                        return
+
+            # Проверяем содержит ли новость фильтруемые слова
+            if any(word for word in user["filter_words"] in data["text"]):
+                return
+
+            markup = types.InlineKeyboardMarkup(row_width=2)
+            markup.add(types.InlineKeyboardButton('❤️', callback_data=f'like_{channel}'))
+            markup.add(types.InlineKeyboardButton('👎', callback_data=f'nolike_{channel}'))
+            markup.add(types.InlineKeyboardButton('Далее', callback_data='next'))
             if data["filename"] == "None":
                 await bot.send_message(user_id, data['text'], reply_markup=markup)
             else:
-                if path.join(path.dirname(path.abspath(__file__)), data['filename'])[-4:] == ".mp4":
+                if path.join(path.dirname(path.abspath(__file__)), data['filename']).endswith('.mp4'):
                     await bot.send_video(user_id,open(path.join(path.dirname(path.abspath(__file__)), data['filename']), 'rb'), caption=data['text'], reply_markup=markup)           
                 else:
+                    await bot.send_photo(user_id,open(path.join(path.dirname(path.abspath(__file__)), data['filename']), 'rb'), caption=data['text'], reply_markup=markup)
+
+            # Сохраняем отправленную новость в базу данных
+            async with aiohttp.ClientSession() as session:
+                data = {
+                    'user_id': user_id,
+                    'message_id': data['message_id'],
+                    'channel_id': channel
+                }
+                async with session.post(url=f'{URL}/api/history/', json=data) as response:
+                    if response.status != 201:
+                        return logger.error(await response.text())
     except Exception as e:
-        logger.debug(e)
-        await day_send_news(user_id)
-    
+        return logger.debug(e)
+
 
 async def day_news():
     while True:
