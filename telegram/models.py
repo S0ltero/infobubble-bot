@@ -3,7 +3,7 @@ from django.db import models
 
 
 class TelegramUser(models.Model):
-    user_id = models.CharField(verbose_name="ID telegram пользователя", max_length=130, unique=True)
+    id = models.CharField(verbose_name="ID telegram пользователя", max_length=130, unique=True, primary_key=True)
     filters = ArrayField(models.CharField(max_length=150), blank=True, verbose_name='Пользовательские фильтры')
     filter_words = ArrayField(models.CharField(max_length=150), blank=True, verbose_name="Слова фильтры")
 
