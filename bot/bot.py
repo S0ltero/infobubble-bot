@@ -119,7 +119,7 @@ async def complete_click_inline(call):
         return await bot.answer_callback_query(call.id, 'Вам необходима выбрать хотя бы одну категорию!')
 
     data = {
-        'user_id': user_id,
+        'id': user_id,
         'filters': user_filters[user_id]
     }
 
@@ -278,7 +278,7 @@ async def change_filters_click_inline(call):
         return await bot.answer_callback_query(call.id, 'Вам необходимо выбрать хотя бы одну категорию!')
 
     data = {
-        'user_id': user_id,
+        'id': user_id,
         'filters': user_filters[user_id]
     }
 
@@ -356,7 +356,7 @@ async def day_news():
                 return logger.error(await response.text())
 
     for user in users:
-        await day_send_news(user['user_id'])
+        await day_send_news(user['id'])
 
 
 day_news()
