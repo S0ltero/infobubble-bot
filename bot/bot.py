@@ -318,7 +318,7 @@ async def day_send_news(user_id):
     # Получаем id каналов
     data = {'tags': tags}
     async with aiohttp.ClientSession() as session:
-        async with session.post(url=f'{URL}/api/rate/', data=data) as response:
+        async with session.post(url=f'{URL}/api/channels/', data=data) as response:
             if response.status == 200:
                 channels = response.json()['channels_ids']
             elif response.status == 404:
