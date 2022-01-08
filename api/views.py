@@ -15,9 +15,9 @@ class UserView(APIView):
     queryset = TelegramUser
     serializer_class = TelegramUserSerializer
 
-    def get(self, request, pk):
+    def get(self, request, user_id):
         try:
-            user = self.queryset.objects.get(pk=pk)
+            user = self.queryset.objects.get(id=user_id)
         except TelegramUser.DoesNotExist:
             return Response(
                 data={"description": "Пользователь не найден", 
@@ -41,7 +41,7 @@ class UserView(APIView):
         data = request.data
 
         try:
-            user = TelegramUser.objects.get(pk=data["user_id"])
+            user = TelegramUser.objects.get(id=data["id"])
         except TelegramUser.DoesNotExist:
             return Response(
                 data={"description": "Пользователь не найден", 
