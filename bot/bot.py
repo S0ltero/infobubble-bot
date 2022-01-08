@@ -1,6 +1,6 @@
 import configparser
 import json
-from random import randint
+import asyncio
 from os import path
 
 import aiohttp
@@ -346,18 +346,20 @@ async def day_send_news(user_id):
     
 
 async def day_news():
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url=f'{URL}/api/users/') as response:
-            if response.status == 200:
-                users = await response.json()
-            elif response.status == 404:
-                return logger.error("Пользователи не найдены")
-            else:
-                return logger.error(await response.text())
+    while True:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url=f'{URL}/api/users/') as response:
+                if response.status == 200:
+                    users = await response.json()
+                elif response.status == 404:
+                    return logger.error("Пользователи не найдены")
+                else:
+                    return logger.error(await response.text())
 
-    for user in users:
-        await day_send_news(user['id'])
+        for user in users:
+            await day_send_news(user['id'])
 
+loop = asyncio.get_event_loop()
+loop.run_until_complete(day_news())
 
-day_news()
 bot.polling()
