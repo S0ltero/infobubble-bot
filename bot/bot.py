@@ -144,22 +144,22 @@ async def send_news(message):
     async with aiohttp.ClientSession() as session:
         async with session.get(url=f'{URL}/api/user/{user_id}') as response:
             if response.status == 200:
-                tags = response.json()['filters']
+                tags = (await response.json())['filters']
             elif response.status == 404:
                 return logger.info(f"Пользователь {user_id} не найден")
             else:
-                return logger.error(response.text())
+                return logger.error(await response.text())
 
     # Получаем id каналов
     data = {'tags': tags}
     async with aiohttp.ClientSession() as session:
         async with session.post(url=f'{URL}/api/channels/', data=data) as response:
             if response.status == 200:
-                channels = response.json()['channels_ids']
+                channels = (await response.json())['channels_ids']
             elif response.status == 404:
                 return logger.error(f'Каналы с следующими фильтрами не найдены: {", ".join(tags)}')
             else:
-                return logger.error(response.text())
+                return logger.error(await response.text())
 
     markup = types.InlineKeyboardMarkup(row_width=2)
     markup.add(types.InlineKeyboardButton('❤️', callback_data='like'))
@@ -195,7 +195,7 @@ async def on_like(call):
             if response.status == 201:
                 await send_news(call)
             else:
-                return logger.error(response.text())
+                return logger.error(await response.text())
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'nolike')
@@ -215,7 +215,7 @@ async def on_nolike(call):
             if response.status == 201:
                 await send_news(call)
             else:
-                return logger.error(response.text())
+                return logger.error(await response.text())
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'next')
@@ -238,14 +238,14 @@ async def change_filters(message):
     async with aiohttp.ClientSession() as session:
         async with session.get(url=f'{URL}/api/user/{user_id}') as response:
             if response.status == 200:
-                existing_filters = response.json()['filters']
+                existing_filters = (await response.json())['filters']
             elif response.status == 404:
                 return await bot.send_message(
                     chat_id=chat_id, 
                     text='Вы ещё не проходили настройку! Воспользуйтесь командой /start'
                 )
             else:
-                return logger.error(response.text())
+                return logger.error(await response.text())
 
     user_filters[user_id] = existing_filters
 
@@ -285,7 +285,7 @@ async def change_filters_click_inline(call):
     async with aiohttp.ClientSession() as session:
         async with session.put(url=f'{URL}/api/user/', data=data) as response:
             if response.status != 200:
-                return logger.error(response.text())
+                return logger.error(await response.text())
 
     await bot.answer_callback_query(call.id, text='Категории успешно изменены!')
     await bot.delete_message(chat_id, message_id)
@@ -309,22 +309,22 @@ async def day_send_news(user_id):
     async with aiohttp.ClientSession() as session:
         async with session.get(url=f'{URL}/api/user/{user_id}') as response:
             if response.status == 200:
-                tags = response.json()['filters']
+                tags = (await response.json())['filters']
             elif response.status == 404:
                 return logger.info(f"Пользователь {user_id} не найден")
             else:
-                return logger.error(response.text())
+                return logger.error(await response.text())
 
     # Получаем id каналов
     data = {'tags': tags}
     async with aiohttp.ClientSession() as session:
         async with session.post(url=f'{URL}/api/channels/', data=data) as response:
             if response.status == 200:
-                channels = response.json()['channels_ids']
+                channels = (await response.json())['channels_ids']
             elif response.status == 404:
                 return logger.error(f'Каналы с следующими фильтрами не найдены: {", ".join(tags)}')
             else:
-                return logger.error(response.text())
+                return logger.error(await response.text())
 
     markup = types.InlineKeyboardMarkup(row_width=2)
     markup.add(types.InlineKeyboardButton('❤️', callback_data='like'))
@@ -349,11 +349,11 @@ async def day_news():
     async with aiohttp.ClientSession() as session:
         async with session.get(url=f'{URL}/api/users/') as response:
             if response.status == 200:
-                users = response.json()
+                users = await response.json()
             elif response.status == 404:
                 return logger.error("Пользователи не найдены")
             else:
-                return logger.error(response.text())
+                return logger.error(await response.text())
 
     for user in users:
         await day_send_news(user['user_id'])
