@@ -307,7 +307,10 @@ async def day_news():
                     return logger.error(await response.text())
 
         for user in users:
-            await day_send_news(user['id'])
+            await send_news(user)
+    
+        asyncio.sleep(5)
+
 
 loop = asyncio.get_event_loop()
 asyncio.ensure_future(day_news())
