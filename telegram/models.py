@@ -27,6 +27,7 @@ class TelegramChannel(models.Model):
 
 class HistoryMessage(models.Model):
     message_id = models.CharField(verbose_name="ID сообщения", max_length=130)
+    channel_id = models.ForeignKey(TelegramChannel, related_name="history", on_delete=models.CASCADE)
     user_id = models.ForeignKey(TelegramUser, related_name="history", on_delete=models.CASCADE)
 
     class Meta:
