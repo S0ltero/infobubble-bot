@@ -340,8 +340,8 @@ async def day_send_news(user_id):
                 if path.join(path.dirname(path.abspath(__file__)), data['filename'])[-4:] == ".mp4":
                     await bot.send_video(user_id,open(path.join(path.dirname(path.abspath(__file__)), data['filename']), 'rb'), caption=data['text'], reply_markup=markup)           
                 else:
-                    await bot.send_photo(user_id,open(path.join(path.dirname(path.abspath(__file__)), data['filename']), 'rb'), caption=data['text'],reply_markup=markup)
-    except:
+    except Exception as e:
+        logger.debug(e)
         await day_send_news(user_id)
     
 
