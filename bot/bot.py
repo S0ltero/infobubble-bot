@@ -137,47 +137,6 @@ async def complete_click_inline(call):
                 await send_news(call)
 
 
-async def send_news(message):
-    user_id = message.from_user.id
-
-    # Получаем фильтры пользователя
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url=f'{URL}/api/user/{user_id}') as response:
-            if response.status == 200:
-                tags = (await response.json())['filters']
-            elif response.status == 404:
-                return logger.info(f"Пользователь {user_id} не найден")
-            else:
-                return logger.error(await response.text())
-
-    # Получаем id каналов
-    data = {'tags': tags}
-    async with aiohttp.ClientSession() as session:
-        async with session.post(url=f'{URL}/api/channels/', json=data) as response:
-            if response.status == 200:
-                channels = (await response.json())['channels_ids']
-            elif response.status == 404:
-                return logger.error(f'Каналы с следующими фильтрами не найдены: {", ".join(tags)}')
-            else:
-                return logger.error(await response.text())
-
-    markup = types.InlineKeyboardMarkup(row_width=2)
-    markup.add(types.InlineKeyboardButton('❤️', callback_data='like'))
-    markup.add(types.InlineKeyboardButton('👎', callback_data='nolike'))
-    markup.add(types.InlineKeyboardButton('Далее', callback_data='next'))
-    try:
-        with open(path.join(path.dirname(path.abspath(__file__)),channels[randint(0,len(channels))]+str(randint(0,4))+'.json'), 'r', encoding='utf-8') as fh: #открываем файл на чтение
-            data = json.load(fh)
-            if data["filename"] == "None":
-                await bot.send_message(user_id, data['text'], reply_markup=markup)
-            else:
-                if path.join(path.dirname(path.abspath(__file__)), data['filename'])[-4:] == ".mp4":
-                    await bot.send_video(user_id,open(path.join(path.dirname(path.abspath(__file__)), data['filename']), 'rb'), caption=data['text'], reply_markup=markup)           
-                else:
-                    await bot.send_photo(user_id,open(path.join(path.dirname(path.abspath(__file__)), data['filename']), 'rb'), caption=data['text'],reply_markup=markup)
-    except:
-        await send_news(message)
-
 @bot.callback_query_handler(func=lambda call: call.data.startswith('like'))
 async def on_like(call):
     user_id = call.from_user.id
@@ -304,16 +263,7 @@ async def change_filters_click_inline(message):
         await bot.send_message(user_id,"Сейчас я отправляю новости, а возможно завтра захватываю мир :)",reply_markup=markup_button)
 
 
-async def day_send_news(user_id):
-    # Получаем фильтры пользователя
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url=f'{URL}/api/user/{user_id}') as response:
-            if response.status == 200:
-                tags = (await response.json())['filters']
-            elif response.status == 404:
-                return logger.info(f"Пользователь {user_id} не найден")
-            else:
-                return logger.error(await response.text())
+async def send_news(user):
 
     # Получаем id каналов
     data = {'tags': tags}
