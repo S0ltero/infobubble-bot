@@ -151,10 +151,15 @@ async def on_like(call):
 
     async with aiohttp.ClientSession() as session:
         async with session.post(url=f'{URL}/api/rate/', json=data) as response:
-            if response.status == 201:
-                await send_news(call)
+            if response.status != 201:
+                return logger.error(await response.text())
+        async with session.get(url=f'{URL}/api/user/{user_id}') as response:
+            if response.status == 200:
+                user = await response.json()
             else:
                 return logger.error(await response.text())
+    
+    await send_news(user)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('nolike'))
@@ -171,20 +176,35 @@ async def on_nolike(call):
 
     async with aiohttp.ClientSession() as session:
         async with session.post(url=f'{URL}/api/rate/', json=data) as response:
-            if response.status == 201:
-                await send_news(call)
+            if response.status != 201:
+                return logger.error(await response.text())
+        async with session.get(url=f'{URL}/api/user/{user_id}') as response:
+            if response.status == 200:
+                user = await response.json()
             else:
                 return logger.error(await response.text())
+    
+    await send_news(user)
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'next')
 async def next_news(call):
-    await send_news(call)
+    user_id = call.from_user.id
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url=f'{URL}/api/user/{user_id}') as response:
+            if response.status == 200:
+                user = await response.json()
+    await send_news(user)
 
 
 @bot.message_handler(commands=['news'])
 async def send_new(message):
-    await send_news(message)
+    user_id = message.from_user.id
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url=f'{URL}/api/user/{user_id}') as response:
+            if response.status == 200:
+                user = await response.json()
+    await send_news(user)
 
 
 @bot.message_handler(commands=['changefilters'])
@@ -244,13 +264,15 @@ async def change_filters_click_inline(call):
 
     async with aiohttp.ClientSession() as session:
         async with session.put(url=f'{URL}/api/user/', json=data) as response:
-            if response.status != 200:
+            if response.status == 200:
+                user = await response.json()
+            else:
                 return logger.error(await response.text())
 
     await bot.answer_callback_query(call.id, text='Категории успешно изменены!')
     await bot.delete_message(chat_id, message_id)
 
-    await send_news(call)
+    await send_news(user)
 
 
 @bot.message_handler(content_types=["text"])
