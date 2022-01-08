@@ -16,10 +16,6 @@ class TelegramChannel(models.Model):
     channel_id = models.CharField(verbose_name="ID telegram канала", max_length=130)
     tags = ArrayField(models.CharField(max_length=150), blank=True, verbose_name='Тэги канала')
 
-    def __str__(self):
-       return f"{self.channel_id}"
-
-
     class Meta:
         verbose_name = "Канал"
         verbose_name_plural = "Каналы"
