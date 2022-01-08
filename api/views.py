@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 
-from telegram.models import TelegramChannel, TelegramUser
+from telegram.models import TelegramChannel, TelegramUser, HistoryMessage
 from telegram.serializers import (
     TelegramUserSerializer,
     HistoryMessageSerializer,
