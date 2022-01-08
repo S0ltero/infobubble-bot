@@ -265,6 +265,8 @@ async def change_filters_click_inline(message):
 
 
 async def send_news(user):
+    user_id = user['id']
+    tags = user['filters']
 
     # Получаем id каналов
     data = {'tags': tags}
