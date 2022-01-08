@@ -310,6 +310,5 @@ async def day_news():
             await day_send_news(user['id'])
 
 loop = asyncio.get_event_loop()
-loop.run_until_complete(day_news())
-
-bot.polling()
+asyncio.ensure_future(day_news())
+asyncio.run(bot.polling())
