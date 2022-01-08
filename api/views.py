@@ -76,6 +76,14 @@ class UserListView(ListAPIView):
 class ChannelView(APIView):
     queryset = TelegramChannel
 
+    def get(self, request):
+        channel_ids = self.queryset.objects.values_list("id", flat=True)
+
+        if channel_ids:
+            return Response({'channels_ids': channel_ids}, status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
     def post(self, request):
         data = request.data
 
