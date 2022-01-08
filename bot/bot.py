@@ -209,19 +209,20 @@ async def change_filters(message):
     user_filters[user_id] = existing_filters
 
     markup = types.InlineKeyboardMarkup()
+    buttons = []
     i = 0
-    btn = []
-    for _filter in news_filters:
+
+    for _filter in news_filters[:8]:
         if _filter in existing_filters:
             i+=1
-            btn.append(types.InlineKeyboardButton(text=f'{_filter} ✅', callback_data=_filter))
+            buttons.append(types.InlineKeyboardButton(text=f'{_filter} ✅', callback_data=_filter))
         else:
             i+=1
-            btn.append(types.InlineKeyboardButton(text=_filter, callback_data=_filter))
+            buttons.append(types.InlineKeyboardButton(text=_filter, callback_data=_filter))
         if i == 2:
             i = 0
-            markup.row(btn[0], btn[1])
-            btn =[]
+            markup.row(*buttons)
+            buttons = []
     markup.add(types.InlineKeyboardButton(text='Сохранить', callback_data='changefilters'))
 
     await bot.send_message(chat_id, 'Измените категории', reply_markup=markup)
