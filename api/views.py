@@ -92,7 +92,17 @@ class ChannelView(APIView):
 
 
 class HistoryMessageView(APIView):
+    queryset = HistoryMessage
     serializer_class = HistoryMessageSerializer
+
+    def get(self, request, user_id, channel_id, message_id):
+        try:
+            history_message = self.queryset.objects.get(user_id=user_id, channel_id=channel_id, message_id=message_id)
+        except HistoryMessage.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = self.serializer_class(history_message)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
         data = request.data
