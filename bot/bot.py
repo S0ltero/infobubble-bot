@@ -432,7 +432,7 @@ async def day_news():
         for user in users:
             await send_news(user)
     
-        asyncio.sleep(86400)
+        await asyncio.sleep(86400)
 
 
 async def subscribe_news():
@@ -449,7 +449,7 @@ async def subscribe_news():
         for user in users:
             await send_news(user, is_subscribe=True)
         
-        asyncio.sleep(10)
+        await asyncio.sleep(10)
 
 
 loop = asyncio.get_event_loop()
