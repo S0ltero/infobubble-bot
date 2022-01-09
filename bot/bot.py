@@ -379,10 +379,17 @@ async def send_news(user, is_subscribe = False):
             data = json.load(fh)
 
         # Проверяем отправлялась ли новость раньше
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url=f'{URL}/api/history/{user_id}/{channel}/{data["message_id"]}') as response:
-                if response.status == 200:
-                    continue
+        if not user_history.get(user_id):
+            user_history[user_id] = []
+
+        if data["message_id"] in user_history[user_id]:
+            continue
+        else:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url=f'{URL}/api/history/{user_id}/{channel}/{data["message_id"]}') as response:
+                    if response.status == 200:
+                        user_history[user_id].append(data["message_id"])
+                        continue
 
         # Проверяем содержит ли новость фильтруемые слова
         if user.get("filter_words"):
@@ -418,6 +425,7 @@ async def send_news(user, is_subscribe = False):
                 if response.status != 201:
                     return logger.error(await response.text())
                 else:
+                    user_history[user_id].append(data['message_id'])
                     return
 
 
