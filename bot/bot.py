@@ -92,24 +92,19 @@ async def filter_click_inline(call):
 
     markup = call.message.reply_markup
     for i, row in enumerate(markup.keyboard):
-        l = 0
         try:
             filter_button = next(btn for btn in row if btn.callback_data == choosen_filter)
+            btn_index = row.index(filter_button)
         except StopIteration:
             continue
         else:
-            for btn in row:
-                
-                if btn.callback_data == choosen_filter:                   
-                    if event_type == 'append':
-                        filter_button.text = f'{choosen_filter} ✅'
-                    elif event_type == 'remove':
-                        filter_button.text = f'{choosen_filter} ❎'
-                    row[l]=filter_button
-                l+=1
+            if event_type == 'append':
+                filter_button.text = f'{choosen_filter} ✅'
+            elif event_type == 'remove':
+                filter_button.text = choosen_filter
+            row[btn_index] = filter_button
             markup.keyboard[i] = row
             break
-
 
     await bot.edit_message_reply_markup(
         chat_id=chat_id,
