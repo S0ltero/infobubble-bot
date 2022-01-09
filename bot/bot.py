@@ -219,19 +219,21 @@ async def change_filters(message):
     chat_id = message.chat.id
 
     # Получаем фильтры пользователя
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url=f'{URL}/api/user/{user_id}') as response:
-            if response.status == 200:
-                existing_filters = (await response.json())['filters']
-            elif response.status == 404:
-                return await bot.send_message(
-                    chat_id=chat_id, 
-                    text='Вы ещё не проходили настройку! Воспользуйтесь командой /start'
-                )
-            else:
-                return logger.error(await response.text())
-
-    user_filters[user_id] = existing_filters
+    try:
+        existing_filters = user_filters[user_id]
+    except KeyError:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url=f'{URL}/api/user/{user_id}') as response:
+                if response.status == 200:
+                    existing_filters = (await response.json())['filters']
+                    user_filters[user_id] = existing_filters
+                elif response.status == 404:
+                    return await bot.send_message(
+                        chat_id=chat_id, 
+                        text='Вы ещё не проходили настройку! Воспользуйтесь командой /start'
+                    )
+                else:
+                    return logger.error(await response.text())
 
     markup = types.InlineKeyboardMarkup()
     buttons = []
