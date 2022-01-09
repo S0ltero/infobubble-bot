@@ -364,7 +364,7 @@ async def day_news():
         for user in users:
             await send_news(user)
     
-        asyncio.sleep(5)
+        asyncio.sleep(86400)
 
 
 loop = asyncio.get_event_loop()
