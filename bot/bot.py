@@ -359,22 +359,13 @@ async def change_filters_click_inline(message):
         await bot.send_message(user_id,"Сейчас я отправляю новости, а возможно завтра захватываю мир :)", reply_markup=markup_button)
 
 
-async def send_news(user):
+async def send_news(user, is_subscribe = False):
     user_id = user['id']
-    tags = user['filters']
 
-    # Получаем id каналов
-    data = {'tags': tags}
-    async with aiohttp.ClientSession() as session:
-        async with session.post(url=f'{URL}/api/channels/', json=data) as response:
-            if response.status == 200:
-                channels = (await response.json())['channels_ids']
-            elif response.status == 404:
-                return logger.error(f'Каналы с следующими фильтрами не найдены: {", ".join(tags)}')
-            else:
-                return logger.error(await response.text())
-
-    channel = random.choice(channels)
+    if is_subscribe:
+        channel = random.choice(user["subscribe_ids"])
+    else:
+        channel = random.choice(user["channel_ids"])
     channels_dir = path.join(path.dirname(path.abspath(__file__)), "channels_dump")
     channel_file = f"{channel}{random.randint(0, 4)}.json"
 
