@@ -250,6 +250,65 @@ async def change_filters(message):
     await bot.send_message(chat_id, 'Измените категории', reply_markup=markup)
 
 
+@bot.callback_query_handler(func=lambda call: call.data in ('previous_filters', 'next_filters'))
+async def on_nav_filters_click_inline(call):
+    user_id = call.from_user.id
+    chat_id = call.message.chat.id
+    message_id = call.message.id
+
+    save_btn = call.message.reply_markup.keyboard[-1][0]
+    nav_buttons = call.message.reply_markup.keyboard[-2]
+    num_pages_btn = nav_buttons[1]
+    current_page, count_pages = map(int, num_pages_btn.text.split('/'))
+
+    if current_page == count_pages and call.data == 'next_filters':
+        return
+    elif current_page == 1 and call.data == 'previous_filters':
+        return
+
+    if call.data == 'previous_filters':
+        next_page = current_page - 1
+    else:
+        next_page = current_page + 1
+    num_pages_btn.text = f'{next_page}/{count_pages}'
+    nav_buttons[1] = num_pages_btn
+
+    # Получаем фильтры пользователя
+    try:
+        existing_filters = user_filters[user_id]
+    except KeyError:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url=f'{URL}/api/user/{user_id}') as response:
+                if response.status == 200:
+                    existing_filters = (await response.json())['filters']
+                else:
+                    return logger.error(await response.text())
+
+    markup = types.InlineKeyboardMarkup()
+    buttons = []
+    i = 0
+    start_index = current_page * 8
+    if next_page == 1:
+        start_index = 0
+    stop_index = next_page * 8
+
+    for _filter in news_filters[start_index:stop_index]:
+        if _filter in existing_filters:
+            i+=1
+            buttons.append(types.InlineKeyboardButton(text=f'{_filter} ✅', callback_data=_filter))
+        else:
+            i+=1
+            buttons.append(types.InlineKeyboardButton(text=_filter, callback_data=_filter))
+        if i == 2:
+            i = 0
+            markup.row(*buttons)
+            buttons = []
+    markup.row(*nav_buttons)
+    markup.add(save_btn)
+
+    await bot.edit_message_reply_markup(chat_id=chat_id, message_id=message_id, reply_markup=markup)
+
+
 @bot.callback_query_handler(func=lambda call: call.data == 'changefilters')
 async def change_filters_click_inline(call):
     user_id = call.from_user.id
