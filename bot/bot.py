@@ -435,6 +435,24 @@ async def day_news():
         asyncio.sleep(86400)
 
 
+async def subscribe_news():
+    while True:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url=f'{URL}/api/users/') as response:
+                if response.status == 200:
+                    users = await response.json()
+                elif response.status == 404:
+                    return logger.error("Пользователи не найдены")
+                else:
+                    return logger.error(await response.text())
+
+        for user in users:
+            await send_news(user, is_subscribe=True)
+        
+        asyncio.sleep(10)
+
+
 loop = asyncio.get_event_loop()
 asyncio.ensure_future(day_news())
+asyncio.ensure_future(subscribe_news())
 asyncio.run(bot.polling())
