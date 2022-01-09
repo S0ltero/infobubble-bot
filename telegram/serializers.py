@@ -10,6 +10,7 @@ from .models import (
 
 class TelegramUserSerializer(serializers.ModelSerializer):
     channel_ids = serializers.SerializerMethodField()
+    subscribe_ids = serializers.SerializerMethodField()
 
     class Meta:
         model = TelegramUser
@@ -18,6 +19,10 @@ class TelegramUserSerializer(serializers.ModelSerializer):
     def get_channel_ids(self, obj):
         channel_ids = TelegramChannel.objects.filter(tags__overlap=obj.filters).values_list("id", flat=True)
         return channel_ids
+
+    def get_subscribe_ids(self, obj):
+        subscribe_ids = obj.subscribes.values_list("channel_id", flat=True)
+        return subscribe_ids
 
 
 class HistoryMessageSerializer(serializers.ModelSerializer):
