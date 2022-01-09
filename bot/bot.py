@@ -364,6 +364,7 @@ async def send_news(user, is_subscribe = False):
     user_id = user['id']
 
     while True:
+        await asyncio.sleep(0)
         if is_subscribe:
             channel = random.choice(user["subscribe_ids"])
         else:
