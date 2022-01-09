@@ -431,8 +431,8 @@ async def day_news():
                     return logger.error(await response.text())
 
         for user in users:
-            await send_news(user)
-    
+            asyncio.ensure_future(send_news(user, is_subscribe=True))
+        
         await asyncio.sleep(86400)
 
 
@@ -448,7 +448,7 @@ async def subscribe_news():
                     return logger.error(await response.text())
 
         for user in users:
-            await send_news(user, is_subscribe=True)
+            asyncio.ensure_future(send_news(user, is_subscribe=True))
         
         await asyncio.sleep(10)
 
