@@ -42,3 +42,8 @@ class UserMessageRate(models.Model):
     class Meta:
         verbose_name = "Оценка"
         verbose_name_plural = "Оценки"
+
+
+class UserSubscribe(models.Model):
+    user_id = models.ForeignKey(TelegramUser, related_name="subscribes", on_delete=models.CASCADE)
+    channel_id = models.ForeignKey(TelegramChannel, related_name="subscribes", on_delete=models.CASCADE)
