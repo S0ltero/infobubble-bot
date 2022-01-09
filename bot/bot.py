@@ -40,8 +40,16 @@ async def start(message):
 
     # Инициализируем настройку
     markup = types.InlineKeyboardMarkup(row_width=3)
+    num_pages = len(news_filters) % 8
+
     for _filter in news_filters:
-        markup.add(types.InlineKeyboardButton(_filter, callback_data=_filter))
+        markup.row(types.InlineKeyboardButton(_filter, callback_data=_filter))
+
+    markup.row(
+        types.InlineKeyboardButton('Назад', callback_data='previous_filters'),
+        types.InlineKeyboardButton(f'1/{num_pages}', callback_data='page_count'),
+        types.InlineKeyboardButton('Далее', callback_data='next_filters')
+    )
     markup.add(types.InlineKeyboardButton('Сохранить', callback_data='complete'))
     text = (
         'Привет! Слишком много каналов в Telegram? Сложно это всё читать, понимаю. '
@@ -233,6 +241,7 @@ async def change_filters(message):
     markup = types.InlineKeyboardMarkup()
     buttons = []
     i = 0
+    num_pages = len(news_filters) % 8
 
     for _filter in news_filters[:8]:
         if _filter in existing_filters:
@@ -245,7 +254,12 @@ async def change_filters(message):
             i = 0
             markup.row(*buttons)
             buttons = []
-    markup.add(types.InlineKeyboardButton(text='Сохранить', callback_data='changefilters'))
+    markup.row(
+        types.InlineKeyboardButton('Назад', callback_data='previous_filters'),
+        types.InlineKeyboardButton(f'1/{num_pages}', callback_data='page_count'),
+        types.InlineKeyboardButton('Далее', callback_data='next_filters')
+    )
+    markup.add(types.InlineKeyboardButton('Сохранить', callback_data='changefilters'))
 
     await bot.send_message(chat_id, 'Измените категории', reply_markup=markup)
 
