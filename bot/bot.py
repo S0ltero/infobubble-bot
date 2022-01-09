@@ -19,6 +19,7 @@ bot = AsyncTeleBot(API_TOKEN)
 
 news_filters = ['ИТ', 'Дизайн', 'Бизнес', 'Игры', 'Новости', "Блоги", "Продажи", "Музыка","Позновательное", "Цитаты"]
 user_filters = {}
+user_history = {}
 markup_button = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
 itembtn1 = types.KeyboardButton('Изменить фильтры')
 itembtn2 = types.KeyboardButton('Получить новости')
@@ -453,7 +454,8 @@ async def subscribe_news():
         await asyncio.sleep(10)
 
 
-loop = asyncio.get_event_loop()
-asyncio.ensure_future(day_news())
-asyncio.ensure_future(subscribe_news())
-asyncio.run(bot.polling())
+if __name__ == '__main__':
+    loop = asyncio.get_event_loop()
+    loop.create_task(day_news())
+    loop.create_task(subscribe_news())
+    executor.start_polling(dp, loop=loop)
