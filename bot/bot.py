@@ -34,9 +34,10 @@ async def start(message):
     async with aiohttp.ClientSession() as session:
         async with session.get(f'{URL}/api/user/{user_id}') as response:
             if response.status == 200:
+                user = await response.json()
                 text = ('Вы уже проходили настройку!\nДля изменения категорий воспользуйтесь командой: /changefilters')
                 await bot.send_message(message.chat.id, text)
-                return await send_news(message)
+                return await send_news(user)
 
     # Инициализируем настройку
     markup = types.InlineKeyboardMarkup(row_width=3)
