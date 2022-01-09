@@ -324,11 +324,13 @@ async def send_news(user):
             if any(word for word in user["filter_words"] in data["text"]):
                 return
 
+            # Добавляем inline кнопки
             markup = types.InlineKeyboardMarkup(row_width=2)
             markup.add(types.InlineKeyboardButton('❤️', callback_data=f'like_{channel}'))
             markup.add(types.InlineKeyboardButton('👎', callback_data=f'nolike_{channel}'))
             markup.add(types.InlineKeyboardButton('Далее', callback_data='next'))
-            if data["filename"] == "None":
+
+            # Проверяем содержит ли новость файлы
                 await bot.send_message(user_id, data['text'], reply_markup=markup)
             else:
                 if path.join(path.dirname(path.abspath(__file__)), data['filename']).endswith('.mp4'):
