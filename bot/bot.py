@@ -331,6 +331,7 @@ async def send_news(user):
             markup.add(types.InlineKeyboardButton('Далее', callback_data='next'))
 
             # Проверяем содержит ли новость файлы
+            if not data["filename"]:
                 await bot.send_message(user_id, data['text'], reply_markup=markup)
             else:
                 if path.join(path.dirname(path.abspath(__file__)), data['filename']).endswith('.mp4'):
