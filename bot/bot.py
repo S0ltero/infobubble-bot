@@ -6,8 +6,7 @@ import os
 from os import path
 
 import aiohttp
-from telebot.async_telebot import AsyncTeleBot
-from telebot import types
+from aiogram import Bot, Dispatcher, executor, types
 from loguru import logger
 
 config = configparser.ConfigParser()
@@ -15,7 +14,8 @@ config.read(path.join(path.dirname(path.abspath(__file__)), 'config.ini'))
 URL = config['Django']['url']
 API_TOKEN = config['Telegram']['token']
 
-bot = AsyncTeleBot(API_TOKEN)
+bot = Bot(token=API_TOKEN)
+dp = Dispatcher(bot)
 
 news_filters = ['ИТ', 'Дизайн', 'Бизнес', 'Игры', 'Новости', "Блоги", "Продажи", "Музыка","Позновательное", "Цитаты"]
 user_filters = {}
@@ -26,7 +26,7 @@ itembtn2 = types.KeyboardButton('Получить новости')
 markup_button.add(itembtn1, itembtn2)
 
 
-@bot.message_handler(commands=['start'])
+@dp.message_handler(commands=['start'])
 async def start(message):
     '''Инициируем добавление нового пользователя'''
     user_id = message.from_user.id
@@ -61,7 +61,7 @@ async def start(message):
     await bot.send_message(message.chat.id, text, reply_markup=markup)
 
 
-@bot.message_handler(commands=['help'])
+@dp.message_handler(commands=['help'])
 async def help(message):
     text = (
         'Ты можешь написать мне: /changefilters — чтобы вернуться к информационным фильтрам и поправить их. '
@@ -70,13 +70,13 @@ async def help(message):
     await bot.send_message(message.chat.id, text)
 
 
-@bot.callback_query_handler(func=lambda call: call.data in news_filters)
+@dp.callback_query_handler(lambda call: call.data in news_filters)
 async def filter_click_inline(call):
     '''Собираем фильтры пользователя'''
     choosen_filter = call.data
     user_id = call.from_user.id
     chat_id = call.message.chat.id
-    message_id = call.message.id
+    message_id = call.message.message_id
 
     try:
         existing_filters = user_filters[user_id]
@@ -93,7 +93,7 @@ async def filter_click_inline(call):
         user_filters[user_id] = existing_filters
 
     markup = call.message.reply_markup
-    for i, row in enumerate(markup.keyboard):
+    for i, row in enumerate(markup.inline_keyboard):
         try:
             filter_button = next(btn for btn in row if btn.callback_data == choosen_filter)
             btn_index = row.index(filter_button)
@@ -105,7 +105,7 @@ async def filter_click_inline(call):
             elif event_type == 'remove':
                 filter_button.text = choosen_filter
             row[btn_index] = filter_button
-            markup.keyboard[i] = row
+            markup.inline_keyboard[i] = row
             break
 
     await bot.edit_message_reply_markup(
@@ -115,12 +115,12 @@ async def filter_click_inline(call):
     )
 
 
-@bot.callback_query_handler(func=lambda call: call.data == 'complete')
+@dp.callback_query_handler(lambda call: call.data == 'complete')
 async def complete_click_inline(call):
     '''Сохраняем пользователя и его фильтры в базу данных'''
     user_id = call.from_user.id
     chat_id = call.message.chat.id
-    message_id = call.message.id
+    message_id = call.message.message_id
 
     if not user_filters.get(user_id):
         return await bot.answer_callback_query(call.id, 'Вам необходима выбрать хотя бы одну категорию!')
@@ -144,10 +144,10 @@ async def complete_click_inline(call):
                 await send_news(call)
 
 
-@bot.callback_query_handler(func=lambda call: call.data.startswith('like'))
+@dp.callback_query_handler(lambda call: call.data.startswith('like'))
 async def on_like(call):
     user_id = call.from_user.id
-    message_id = call.message.id
+    message_id = call.message.message_id
     channel_id = call.data.split('_')[1]
     data = {
         'user_id': user_id,
@@ -169,10 +169,10 @@ async def on_like(call):
     await send_news(user)
 
 
-@bot.callback_query_handler(func=lambda call: call.data.startswith('nolike'))
+@dp.callback_query_handler(lambda call: call.data.startswith('nolike'))
 async def on_nolike(call):
     user_id = call.from_user.id
-    message_id = call.message.id
+    message_id = call.message.message_id
     channel_id = call.data.split('_')[1]
     data = {
         'user_id': user_id,
@@ -194,7 +194,7 @@ async def on_nolike(call):
     await send_news(user)
 
 
-@bot.callback_query_handler(func=lambda call: call.data == 'next')
+@dp.callback_query_handler(lambda call: call.data == 'next')
 async def next_news(call):
     user_id = call.from_user.id
     async with aiohttp.ClientSession() as session:
@@ -204,7 +204,7 @@ async def next_news(call):
     await send_news(user)
 
 
-@bot.message_handler(commands=['news'])
+@dp.message_handler(commands=['news'])
 async def send_new(message):
     user_id = message.from_user.id
     async with aiohttp.ClientSession() as session:
@@ -214,7 +214,7 @@ async def send_new(message):
     await send_news(user)
 
 
-@bot.message_handler(commands=['changefilters'])
+@dp.message_handler(commands=['changefilters'])
 async def change_filters(message):
     '''Редактируем фильтры пользователя'''
     user_id = message.from_user.id
@@ -263,14 +263,14 @@ async def change_filters(message):
     await bot.send_message(chat_id, 'Измените категории', reply_markup=markup)
 
 
-@bot.callback_query_handler(func=lambda call: call.data in ('previous_filters', 'next_filters'))
+@dp.callback_query_handler(lambda call: call.data in ('previous_filters', 'next_filters'))
 async def on_nav_filters_click_inline(call):
     user_id = call.from_user.id
     chat_id = call.message.chat.id
-    message_id = call.message.id
+    message_id = call.message.message_id
 
-    save_btn = call.message.reply_markup.keyboard[-1][0]
-    nav_buttons = call.message.reply_markup.keyboard[-2]
+    save_btn = call.message.reply_markup.inline_keyboard[-1][0]
+    nav_buttons = call.message.reply_markup.inline_keyboard[-2]
     num_pages_btn = nav_buttons[1]
     current_page, count_pages = map(int, num_pages_btn.text.split('/'))
 
@@ -322,11 +322,11 @@ async def on_nav_filters_click_inline(call):
     await bot.edit_message_reply_markup(chat_id=chat_id, message_id=message_id, reply_markup=markup)
 
 
-@bot.callback_query_handler(func=lambda call: call.data == 'changefilters')
+@dp.callback_query_handler(lambda call: call.data == 'changefilters')
 async def change_filters_click_inline(call):
     user_id = call.from_user.id
     chat_id = call.message.chat.id
-    message_id = call.message.id
+    message_id = call.message.message_id
 
     if not user_filters.get(user_id):
         return await bot.answer_callback_query(call.id, 'Вам необходимо выбрать хотя бы одну категорию!')
@@ -349,7 +349,7 @@ async def change_filters_click_inline(call):
     await send_news(user)
 
 
-@bot.message_handler(content_types=["text"])
+@dp.message_handler(content_types=["text"])
 async def change_filters_click_inline(message):
     if message.text == "Изменить фильтры":
         await change_filters(message)
