@@ -25,10 +25,6 @@ dp = Dispatcher(bot, storage=storage)
 news_filters = ['ИТ', 'Дизайн', 'Бизнес', 'Игры', 'Новости', "Блоги", "Продажи", "Музыка","Позновательное", "Цитаты"]
 user_filters = {}
 user_history = {}
-markup_button = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
-itembtn1 = types.KeyboardButton('Изменить фильтры')
-itembtn2 = types.KeyboardButton('Получить новости')
-markup_button.add(itembtn1, itembtn2)
 
 
 async def get_channel(text: str):
@@ -374,17 +370,6 @@ async def change_filters_click_inline(call):
     await bot.delete_message(chat_id, message_id)
 
     await send_news(user)
-
-
-@dp.message_handler(content_types=["text"])
-async def on_message(message):
-    if message.text == "Изменить фильтры":
-        await change_filters(message)
-    if message.text == "Получить новости":
-        await send_new(message)
-    user_id = message.from_user.id
-    if message.text != "Получить новости" and message.text != "Изменить фильтры":
-        await bot.send_message(user_id,"Сейчас я отправляю новости, а возможно завтра захватываю мир :)", reply_markup=markup_button)
 
 
 @dp.message_handler(commands=['subscribes'])
