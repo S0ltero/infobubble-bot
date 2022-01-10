@@ -2,11 +2,15 @@ import configparser
 import json
 import asyncio
 import random
+import re
 import os
 from os import path
 
 import aiohttp
 from aiogram import Bot, Dispatcher, executor, types
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram.dispatcher.filters.state import State, StatesGroup
+from aiogram.utils.exceptions import ChatNotFound
 from loguru import logger
 
 config = configparser.ConfigParser()
@@ -25,6 +29,28 @@ markup_button = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboar
 itembtn1 = types.KeyboardButton('Изменить фильтры')
 itembtn2 = types.KeyboardButton('Получить новости')
 markup_button.add(itembtn1, itembtn2)
+
+
+async def get_channel(text: str):
+    pattern = r'https:\/\/t\.me\/(.+)'
+    if text.startswith('@'):
+        channel = text
+        return channel
+    elif re.match(pattern, text):
+        result = re.match(pattern, text)
+        channel = f"@{result.group(1)}"
+        return channel
+    else:
+        return None
+
+
+# States
+class SubscribeForm(StatesGroup):
+    channel = State()
+
+
+class UnsubscribeForm(StatesGroup):
+    channel = State()
 
 
 @dp.message_handler(commands=['start'])
@@ -359,6 +385,109 @@ async def on_message(message):
     user_id = message.from_user.id
     if message.text != "Получить новости" and message.text != "Изменить фильтры":
         await bot.send_message(user_id,"Сейчас я отправляю новости, а возможно завтра захватываю мир :)", reply_markup=markup_button)
+
+
+@dp.message_handler(commands=['subscribes'])
+async def subscribes(message):
+    user_id = message.from_user.id
+
+    # Проверяем проходил ли пользователь настройку
+    async with aiohttp.ClientSession() as session:
+        async with session.get(f'{URL}/api/user/{user_id}') as response:
+            if response.status != 200:
+                text = "Вы ещё не проходили настройку.\nВоспользуйтесь командой: /start"
+                return await bot.send_message(message.chat.id, text)
+    
+    markup = types.InlineKeyboardMarkup()
+    markup.row(
+        types.InlineKeyboardButton('Добавить канал', callback_data='subscribe'),
+        types.InlineKeyboardButton('Удалить канал', callback_data='unsubscribe')
+    )
+
+    await bot.send_message(message.chat.id, 'Выберите действие', reply_markup=markup)
+
+
+@dp.callback_query_handler(lambda call: call.data == 'subscribe')
+async def subscribe_click_inline(call):
+    # Set state
+    await SubscribeForm.channel.set()
+
+    text = 'Отправьте @упоминание или ссылку на канал'
+
+    await bot.send_message(call.message.chat.id, text)
+
+
+@dp.callback_query_handler(lambda call: call.data == 'unsubscribe')
+async def unsubscribe_click_inline(call):
+    # Set state
+    await UnsubscribeForm.channel.set()
+
+    text = 'Отправьте @упоминание или ссылку на канал'
+
+    await bot.send_message(call.message.chat.id, text)
+
+
+@dp.message_handler(state=SubscribeForm.channel)
+async def process_subscribe_channel(message, state):
+    user_id = message.from_user.id
+    channel = await get_channel(message.text)
+    if not channel:
+        await bot.send_message(message.chat.id, 'Указанное значение не является ссылкой на канал или @упоминанием')
+
+    try:
+        channel = await bot.get_chat(channel)
+    except ChatNotFound:
+        await bot.send_message(message.chat.id, 'Указанный канал не найден')
+
+    async with aiohttp.ClientSession() as session:
+        response = await session.get(f'{URL}/api/channel/{channel.id}')
+        if response.status == 404:
+            data = {"id": channel.id, "title": channel.title, "tags": []}
+            response = await session.post(f'{URL}/api/channel/', json=data)
+            if response != 201:
+                await state.finish()
+                return logger.error(await response.text())
+
+        response = await session.get(f'{URL}/api/subscribe/{channel.id}/{user_id}')
+        if response.status == 200:
+            await state.finish()
+            return await bot.send_message(message.chat.id, f"Вы уже подписаны на канал @{channel.username}")
+
+        data = {"channel_id": channel.id, "user_id": user_id}
+        response = await session.post(f'{URL}/api/subscribe/', json=data)
+        if response.status != 201:
+            await state.finish()
+            return logger.error(await response.text())
+
+    await bot.send_message(message.chat.id, f"Вы успешно подписались на канал @{channel.username}")
+    await state.finish()
+
+
+@dp.message_handler(state=UnsubscribeForm.channel)
+async def process_unsubscribe_channel(message, state):
+    user_id = message.from_user.id
+    channel = await get_channel(message.text)
+    if not channel:
+        await state.finish()
+        return await bot.send_message(message.chat.id, 'Указанное значение не является ссылкой на канал или @упоминанием')
+
+    try:
+        channel = await bot.get_chat(channel)
+    except ChatNotFound:
+        await state.finish()
+        return await bot.send_message(message.chat.id, 'Указанный канал не найден')
+    
+    async with aiohttp.ClientSession() as session:
+        response = await session.delete(f'{URL}/api/subscribe/{channel.id}/{user_id}')
+        if response.status == 404:
+            await state.finish()
+            return bot.send_message(message.chat.id, f"Вы не подписаны на канал @{channel.username}")
+        elif response.status != 204:
+            await state.finish()
+            return logger.error(await response.text())
+    
+    await bot.send_message(message.chat.id, f"Вы успешно отписались от канала @{channel.username}")
+    await state.finish()
 
 
 async def send_news(user, is_subscribe = False):
