@@ -25,6 +25,13 @@ class TelegramUserSerializer(serializers.ModelSerializer):
         return subscribe_ids
 
 
+class TelegramChannelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = TelegramChannel
+        fields = "__all__"
+
+
 class HistoryMessageSerializer(serializers.ModelSerializer):
 
     class Meta:
