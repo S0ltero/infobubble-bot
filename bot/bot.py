@@ -399,6 +399,7 @@ async def subscribe_click_inline(call):
 
     text = 'Отправьте @упоминание или ссылку на канал'
 
+    await bot.delete_message(call.message.chat.id, call.message.message_id)
     await bot.send_message(call.message.chat.id, text)
 
 
@@ -409,6 +410,7 @@ async def unsubscribe_click_inline(call):
 
     text = 'Отправьте @упоминание или ссылку на канал'
 
+    await bot.delete_message(call.message.chat.id, call.message.message_id)
     await bot.send_message(call.message.chat.id, text)
 
 
