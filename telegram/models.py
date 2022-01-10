@@ -32,6 +32,7 @@ class HistoryMessage(models.Model):
     class Meta:
         verbose_name = "Собщение истории"
         verbose_name_plural = "Собщения истории"
+        unique_together = ('message_id', 'channel_id', 'user_id')
 
 
 class UserMessageRate(models.Model):
