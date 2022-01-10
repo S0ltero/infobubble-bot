@@ -419,12 +419,22 @@ async def process_subscribe_channel(message, state):
     user_id = message.from_user.id
     channel = await get_channel(message.text)
     if not channel:
-        await bot.send_message(message.chat.id, 'Указанное значение не является ссылкой на канал или @упоминанием')
+        await state.finish()
+        await bot.edit_message_text(
+            text='Указанное значение не является ссылкой на канал или @упоминанием',
+            chat_id=message.chat.id,
+            message_id=message.message_id
+        )
 
     try:
         channel = await bot.get_chat(channel)
     except ChatNotFound:
-        await bot.send_message(message.chat.id, 'Указанный канал не найден')
+        await state.finish()
+        await bot.edit_message_text(
+            text='Указанный канал не найден',
+            chat_id=message.chat.id,
+            message_id=message.message_id
+        )
 
     async with aiohttp.ClientSession() as session:
         response = await session.get(f'{URL}/api/channel/{channel.id}')
@@ -438,15 +448,23 @@ async def process_subscribe_channel(message, state):
         response = await session.get(f'{URL}/api/subscribe/{channel.id}/{user_id}')
         if response.status == 200:
             await state.finish()
-            return await bot.send_message(message.chat.id, f"Вы уже подписаны на канал @{channel.username}")
-
+            await bot.edit_message_text(
+                text=f'Вы уже подписаны на канал @{channel.username}',
+                chat_id=message.chat.id,
+                message_id=message.message_id
+            )
+            return
         data = {"channel_id": channel.id, "user_id": user_id}
         response = await session.post(f'{URL}/api/subscribe/', json=data)
         if response.status != 201:
             await state.finish()
             return logger.error(await response.text())
 
-    await bot.send_message(message.chat.id, f"Вы успешно подписались на канал @{channel.username}")
+    await bot.edit_message_text(
+            text=f"Вы успешно подписались на канал @{channel.username}",
+            chat_id=message.chat.id,
+            message_id=message.message_id
+        )
     await state.finish()
 
 
@@ -456,24 +474,41 @@ async def process_unsubscribe_channel(message, state):
     channel = await get_channel(message.text)
     if not channel:
         await state.finish()
-        return await bot.send_message(message.chat.id, 'Указанное значение не является ссылкой на канал или @упоминанием')
-
+        await bot.edit_message_text(
+            text='Указанное значение не является ссылкой на канал или @упоминанием',
+            chat_id=message.chat.id,
+            message_id=message.message_id
+        )
     try:
         channel = await bot.get_chat(channel)
     except ChatNotFound:
         await state.finish()
-        return await bot.send_message(message.chat.id, 'Указанный канал не найден')
+        await bot.edit_message_text(
+            text='Указанный канал не найден',
+            chat_id=message.chat.id,
+            message_id=message.message_id
+        )
+        return
     
     async with aiohttp.ClientSession() as session:
         response = await session.delete(f'{URL}/api/subscribe/{channel.id}/{user_id}')
         if response.status == 404:
             await state.finish()
-            return bot.send_message(message.chat.id, f"Вы не подписаны на канал @{channel.username}")
+            await bot.edit_message_text(
+                text=f"Вы не подписаны на канал @{channel.username}",
+                chat_id=message.chat.id,
+                message_id=message.message_id
+            )
+            return
         elif response.status != 204:
             await state.finish()
             return logger.error(await response.text())
     
-    await bot.send_message(message.chat.id, f"Вы успешно отписались от канала @{channel.username}")
+    await bot.edit_message_text(
+            text=f"Вы успешно отписались от канала @{channel.username}",
+            chat_id=message.chat.id,
+            message_id=message.message_id
+        )
     await state.finish()
 
 
