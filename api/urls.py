@@ -13,6 +13,7 @@ urlpatterns = [
     path('channels/', ChannelsView.as_view()),
     path('rate/', UserRateView.as_view()),
     path('subscribe/', UserSubscribeView.as_view()),
+    path('subscribe/<channel_id>/<user_id>', UserSubscribeView.as_view()),
     path('history/', HistoryMessageView.as_view()),
     path('history/<user_id>/<channel_id>/<message_id>', HistoryMessageView.as_view())
 ]
