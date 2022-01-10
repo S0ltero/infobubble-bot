@@ -350,7 +350,7 @@ async def change_filters_click_inline(call):
 
 
 @dp.message_handler(content_types=["text"])
-async def change_filters_click_inline(message):
+async def on_message(message):
     if message.text == "Изменить фильтры":
         await change_filters(message)
     if message.text == "Получить новости":
