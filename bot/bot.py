@@ -402,31 +402,32 @@ async def send_news(user, is_subscribe = False):
         markup.add(types.InlineKeyboardButton('👎', callback_data=f'nolike_{channel}'))
         markup.add(types.InlineKeyboardButton('Далее', callback_data='next'))
 
-        # Проверяем содержит ли новость файлы
-        if not data["filename"]:
-            await bot.send_message(user_id, data['text'], reply_markup=markup)
-        else:
-            if path.join(path.dirname(path.abspath(__file__)), data['filename']).endswith('.mp4'):
-                await bot.send_video(user_id,open(path.join(path.dirname(path.abspath(__file__)), data['filename']), 'rb'), caption=data['text'], reply_markup=markup)           
-            else:
-                await bot.send_photo(user_id,open(path.join(path.dirname(path.abspath(__file__)), data['filename']), 'rb'), caption=data['text'], reply_markup=markup)
+        # Сохраняем новость в базу данных
+        has_file = True if data["filename"] else False
+        data = {
+            'user_id': user_id,
+            'message_id': data['message_id'],
+            'channel_id': channel,
+            'text': data['text'],
+            'has_file': has_file
+        }
 
-        # Сохраняем отправленную новость в базу данных
         async with aiohttp.ClientSession() as session:
-            has_file = True if data["filename"] else False
-            data = {
-                'user_id': user_id,
-                'message_id': data['message_id'],
-                'channel_id': channel,
-                'text': data['text'],
-                'has_file': has_file
-            }
-            async with session.post(url=f'{URL}/api/history/', json=data) as response:
-                if response.status != 201:
-                    return logger.error(await response.text())
+            response = await session.post(url=f'{URL}/api/history/', json=data)
+
+        if response.status == 200:
+            if not has_file:
+                await bot.send_message(user_id, data['text'], reply_markup=markup)
+            else:
+                if path.join(path.dirname(path.abspath(__file__)), data['filename']).endswith('.mp4'):
+                    await bot.send_video(user_id,open(path.join(path.dirname(path.abspath(__file__)), data['filename']), 'rb'), caption=data['text'], reply_markup=markup)           
                 else:
-                    user_history[user_id].append(data['message_id'])
-                    return
+                    await bot.send_photo(user_id,open(path.join(path.dirname(path.abspath(__file__)), data['filename']), 'rb'), caption=data['text'], reply_markup=markup)
+
+            user_history[user_id].append(data['message_id'])
+            return
+        else:
+            return logger.error(await response.text())
 
 
 async def day_news():
