@@ -3,12 +3,13 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 
-from telegram.models import TelegramChannel, TelegramUser, HistoryMessage
+from telegram.models import TelegramChannel, TelegramUser, HistoryMessage, UserSubscribe
 from telegram.serializers import (
     TelegramUserSerializer,
     TelegramChannelSerializer,
     HistoryMessageSerializer,
-    UserMessageRateSerializer
+    UserMessageRateSerializer,
+    UserSubscribeSerializer
 )
 
 
@@ -158,3 +159,27 @@ class UserRateView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserSubscribeView(APIView):
+    queryset = UserSubscribe
+    serializer_class = UserSubscribeSerializer
+
+    def post(self, request):
+        data = request.data
+
+        serializer = self.serializer_class(data=data)
+        if serializer.is_valid(raise_exception=False):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, channel_id, user_id):
+        try:
+            subscribe = self.queryset.objects.get(channel_id=channel_id, user_id=user_id)
+        except UserSubscribe.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        
+        subscribe.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
