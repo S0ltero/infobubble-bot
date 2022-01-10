@@ -165,6 +165,15 @@ class UserSubscribeView(APIView):
     queryset = UserSubscribe
     serializer_class = UserSubscribeSerializer
 
+    def get(self, request, channel_id, user_id):
+        try:
+            subscribe = self.queryset.objects.get(channel_id=channel_id, user_id=user_id)
+        except UserSubscribe.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        serialzer = self.serializer_class(subscribe)
+        return Response(serialzer.data, status=status.HTTP_200_OK)
+
     def post(self, request):
         data = request.data
 
