@@ -6,6 +6,7 @@ from rest_framework.generics import ListAPIView
 from telegram.models import TelegramChannel, TelegramUser, HistoryMessage
 from telegram.serializers import (
     TelegramUserSerializer,
+    TelegramChannelSerializer,
     HistoryMessageSerializer,
     UserMessageRateSerializer
 )
@@ -74,6 +75,30 @@ class UserListView(ListAPIView):
 
 
 class ChannelView(APIView):
+    queryset = TelegramChannel
+    serializer_class = TelegramChannelSerializer
+
+    def get(self, request, channel_id):
+        try:
+            channel = self.queryset.objects.get(id=channel_id)
+        except TelegramChannel.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        serializer = self.serializer_class(channel)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        data = request.data
+
+        serializer = self.serializer_class(data=data)
+        if serializer.is_valid(raise_exception=False):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ChannelsView(APIView):
     queryset = TelegramChannel
 
     def get(self, request):
