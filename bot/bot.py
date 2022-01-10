@@ -131,17 +131,17 @@ async def complete_click_inline(call):
     }
 
     async with aiohttp.ClientSession() as session:
-        async with session.post(url=f'{URL}/api/user/', json=data) as response:
-            if response.status == 201:
-                await bot.answer_callback_query(call.id, 'Настройка завершена!')
-                await bot.delete_message(chat_id, message_id)
-                text = (
-                    'Отлично, информационные фильтры заданы! Так я буду лучше понимать тебя. '
-                    'Теперь, я буду присылать тебе посты, а ты их оценивать, я присылать, а ты оценивать, я присылать... и так далее. '
-                    'Если возникнут проблемы, ты всегда можешь заручиться моей поддержкой, написав /help'
-                )
-                await bot.send_message(call.from_user.id, text)
-                await send_news(call)
+        response = session.post(url=f'{URL}/api/user/', json=data)
+    if response.status == 201:
+        await bot.answer_callback_query(call.id, 'Настройка завершена!')
+        await bot.delete_message(chat_id, message_id)
+        text = (
+            'Отлично, информационные фильтры заданы! Так я буду лучше понимать тебя. '
+            'Теперь, я буду присылать тебе посты, а ты их оценивать, я присылать, а ты оценивать, я присылать... и так далее. '
+            'Если возникнут проблемы, ты всегда можешь заручиться моей поддержкой, написав /help'
+        )
+        await bot.send_message(call.from_user.id, text)
+        await send_news(call)
 
 
 @dp.callback_query_handler(lambda call: call.data.startswith('like'))
@@ -386,10 +386,10 @@ async def send_news(user, is_subscribe = False):
             continue
         else:
             async with aiohttp.ClientSession() as session:
-                async with session.get(url=f'{URL}/api/history/{user_id}/{channel}/{data["message_id"]}') as response:
-                    if response.status == 200:
-                        user_history[user_id].append(data["message_id"])
-                        continue
+                response = await session.get(url=f'{URL}/api/history/{user_id}/{channel}/{data["message_id"]}')
+            if response.status == 200:
+                user_history[user_id].append(data["message_id"])
+                continue
 
         # Проверяем содержит ли новость фильтруемые слова
         if user.get("filter_words"):
