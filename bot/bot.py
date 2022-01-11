@@ -49,6 +49,14 @@ class UnsubscribeForm(StatesGroup):
     channel = State()
 
 
+class AddFilterWords(StatesGroup):
+    words = State()
+
+
+class RemoveFilterWords(StatesGroup):
+    words = State()
+
+
 @dp.message_handler(commands=['start'])
 async def start(message):
     '''Инициируем добавление нового пользователя'''
@@ -370,6 +378,151 @@ async def change_filters_click_inline(call):
     await bot.delete_message(chat_id, message_id)
 
     await send_news(user)
+
+
+@dp.message_handler(commands=['filterwords'])
+async def filter_words(message):
+    user_id = message.from_user.id
+
+    # Проверяем проходил ли пользователь настройку
+    async with aiohttp.ClientSession() as session:
+        async with session.get(f'{URL}/api/user/{user_id}') as response:
+            if response.status != 200:
+                text = "Вы ещё не проходили настройку.\nВоспользуйтесь командой: /start"
+                return await bot.send_message(message.chat.id, text)
+
+
+    markup = types.InlineKeyboardMarkup()
+    markup.row(
+        types.InlineKeyboardButton('Добавить слова-фильтры', callback_data='add_filter_words'),
+        types.InlineKeyboardButton('Удалить слова-фильтры', callback_data='remove_filter_words')
+    )
+
+    text = ('Слова-фильтры позволяют исключать новости содержащие одно или несколько ключевых слов.\n\n'
+            'Выберите действие')
+
+    await bot.send_message(message.chat.id, text, reply_markup=markup)
+
+
+@dp.callback_query_handler(lambda call: call.data == 'add_filter_words')
+async def add_filter_words(call):
+    user_id = call.from_user.id
+    chat_id = call.message.chat.id
+    message_id = call.message.message_id
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url=f'{URL}/api/user/{user_id}') as response:
+            if response.status == 200:
+                user = await response.json()
+            else:
+                return logger.error(await response.text())
+
+    await AddFilterWords.words.set()
+
+    if not user.get('filter_words'):
+        text = ('Укажите через запятую слова фильтры, которые желаете добавить.\n\n'
+                'Текущие слова фильтры: отсутствуют')
+    else:
+        text = ('Укажите через запятую слова фильтры, которые желаете добавить.\n\n'
+                'Текущие слова фильтры: ' + ', '.join(user['filter_words']))
+
+    await bot.send_message(chat_id, text)
+    await bot.delete_message(chat_id, message_id)
+
+
+@dp.callback_query_handler(lambda call: call.data == 'remove_filter_words')
+async def remove_filter_words(call):
+    user_id = call.from_user.id
+    chat_id = call.message.chat.id
+    message_id = call.message.message_id
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url=f'{URL}/api/user/{user_id}') as response:
+            if response.status == 200:
+                user = await response.json()
+            else:
+                return logger.error(await response.text())
+
+    await RemoveFilterWords.words.set()
+
+    if not user.get('filter_words'):
+        text = ('Укажите через запятую слова фильтры, которые желаете удалить.\n\n'
+                'Текущие слова фильтры: отсутствуют')
+    else:
+        text = ('Укажите через запятую слова фильтры, которые желаете удалить.\n\n'
+                'Текущие слова фильтры: ' + ', '.join(user['filter_words']))
+
+    await bot.send_message(chat_id, text)
+    await bot.delete_message(chat_id, message_id)
+
+
+@dp.message_handler(state=AddFilterWords.words)
+async def process_add_filter_words(message, state):
+    user_id = message.from_user.id
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url=f'{URL}/api/user/{user_id}') as response:
+            if response.status == 200:
+                user = await response.json()
+            else:
+                await state.finish()
+                return logger.error(await response.text())
+    
+    add_words = list(map(lambda x: x.strip(), message.text.split(',')))
+    if user.get('filter_words'):
+        words = [*user['filter_words'], *add_words]
+    else:
+        words = add_words
+
+    words = list(set(words))
+
+    data = {
+        'id': user_id,
+        'filter_words': words
+    }
+
+    async with aiohttp.ClientSession() as session:
+        async with session.put(url=f'{URL}/api/user/', json=data) as response:
+            if response.status == 200:
+                user = await response.json()
+            else:
+                await state.finish()
+                return logger.error(await response.text())
+
+    await state.finish()
+    await bot.send_message(message.chat.id, text='Слова фильтры успешно изменены!')
+
+
+@dp.message_handler(state=RemoveFilterWords.words)
+async def process_remove_filter_words(message, state):
+    user_id = message.from_user.id
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url=f'{URL}/api/user/{user_id}') as response:
+            if response.status == 200:
+                user = await response.json()
+            else:
+                await state.finish()
+                return logger.error(await response.text())
+    
+    remove_words = list(map(lambda x: x.strip(), message.text.split(',')))
+    words = [word for word in user['filter_words'] if word not in remove_words]
+
+    data = {
+        'id': user_id,
+        'filter_words': words
+    }
+
+    async with aiohttp.ClientSession() as session:
+        async with session.put(url=f'{URL}/api/user/', json=data) as response:
+            if response.status == 200:
+                user = await response.json()
+            else:
+                await state.finish()
+                return logger.error(await response.text())
+
+    await state.finish()
+    await bot.send_message(message.chat.id, text='Слова фильтры успешно изменены!')
 
 
 @dp.message_handler(commands=['subscribes'])
