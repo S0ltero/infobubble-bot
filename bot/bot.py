@@ -676,10 +676,12 @@ async def send_news(user, is_subscribe = False):
 
     while True:
         await asyncio.sleep(0)
-        if is_subscribe:
+        if is_subscribe and user.get["subscribe_ids"]:
             channel = random.choice(user["subscribe_ids"])
-        else:
+        elif not is_subscribe and user.get["channel_ids"]:
             channel = random.choice(user["channel_ids"])
+        else:
+            continue
         channels_dir = path.join(path.dirname(path.abspath(__file__)), "channels_dump")
         channel_file = f"{channel}{random.randint(0, 4)}.json"
 
