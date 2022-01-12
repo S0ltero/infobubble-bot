@@ -72,12 +72,18 @@ async def start(message):
                 return await send_news(user)
 
     # Инициализируем настройку
-    markup = types.InlineKeyboardMarkup(row_width=3)
+    markup = types.InlineKeyboardMarkup()
+    buttons = []
+    i = 0
     num_pages = len(news_filters) % 8
 
-    for _filter in news_filters:
-        markup.row(types.InlineKeyboardButton(_filter, callback_data=_filter))
-
+    for _filter in news_filters[:8]:
+        i+=1
+        buttons.append(types.InlineKeyboardButton(text=_filter, callback_data=_filter))
+        if i == 2:
+            i = 0
+            markup.row(*buttons)
+            buttons = []
     markup.row(
         types.InlineKeyboardButton('Назад', callback_data='previous_filters'),
         types.InlineKeyboardButton(f'1/{num_pages}', callback_data='page_count'),
