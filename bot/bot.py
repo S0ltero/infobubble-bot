@@ -168,7 +168,7 @@ async def complete_click_inline(call):
     }
 
     async with aiohttp.ClientSession() as session:
-        response = session.post(url=f'{URL}/api/user/', json=data)
+        response = await session.post(url=f'{URL}/api/user/', json=data)
     if response.status == 201:
         await bot.answer_callback_query(call.id, 'Настройка завершена!')
         await bot.delete_message(chat_id, message_id)
