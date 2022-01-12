@@ -112,6 +112,7 @@ class ChannelsView(APIView):
 
     def post(self, request):
         data = request.data
+        channel_ids = []
 
         if data.get('tags'):
             tags = data['tags']
