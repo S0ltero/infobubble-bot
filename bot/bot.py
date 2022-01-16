@@ -676,9 +676,9 @@ async def send_news(user, is_subscribe = False):
 
     while True:
         await asyncio.sleep(0)
-        if is_subscribe and user.get["subscribe_ids"]:
+        if is_subscribe and user.get("subscribe_ids"):
             channel = random.choice(user["subscribe_ids"])
-        elif not is_subscribe and user.get["channel_ids"]:
+        elif not is_subscribe and user.get("channel_ids"):
             channel = random.choice(user["channel_ids"])
         else:
             continue
