@@ -1,0 +1,20 @@
+services:
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "5432:5432"
+    env_file:
+      - ./.env
+    healthcheck:
+      test: ["CMD", "curl -f http://0.0.0.0:8000/ || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+  bot:
+    build: .
+    command: python bot/bot.py
+    volumes:
+      - ./:/app
+    env_file:
+      - ./.env
