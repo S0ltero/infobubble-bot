@@ -9,9 +9,9 @@ __pycache__
 .vscode
 
 /logs/*
-/local/*
 /*/migrations/[0-9][0-9][0-9][0-9]_*.py
 cache
 
+.env
 env
 venv
