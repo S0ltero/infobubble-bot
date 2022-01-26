@@ -1,9 +1,0 @@
-{
-    "secret_key": "u5hsjc_0st0k!-1i(@!16klhl$0)zqok-rct%w=r=x$l!zsipk",
-    "token": "2088896663:AAHJLaPjYbl63zRGUcAUZS1RQ5DoFxW3ai4",
-    "database": "test_db",
-    "user": "test2",
-    "host": "localhost",
-    "password": "p@sswo0rd",
-    "port": "5432"
-}
