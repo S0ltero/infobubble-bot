@@ -6,15 +6,7 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-try:
-    with open(os.path.join(BASE_DIR, 'local', 'config.json')) as handle:
-        config = json.load(handle)
-except IOError:
-    config = {
-        'secret_key': 'simple_key',
-    }
-
-SECRET_KEY = str(config['secret_key'])
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
@@ -72,11 +64,11 @@ WSGI_APPLICATION = 'project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': config.get("database", ""),
-        'USER': config.get("user", ""),
-        'PASSWORD': config.get("password", ""),
-        'HOST': config.get("host", ""),
-        'PORT': config.get("port", ""),
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT')
     }
 }
 
