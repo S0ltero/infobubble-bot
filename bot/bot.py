@@ -579,20 +579,18 @@ async def process_subscribe_channel(message, state):
     channel = await get_channel(message.text)
     if not channel:
         await state.finish()
-        await bot.edit_message_text(
-            text='Указанное значение не является ссылкой на канал или @упоминанием',
+        await bot.send_message(
             chat_id=message.chat.id,
-            message_id=message.message_id
+            text='Указанное значение не является ссылкой на канал или @упоминанием'
         )
 
     try:
         channel = await bot.get_chat(channel)
     except ChatNotFound:
         await state.finish()
-        await bot.edit_message_text(
-            text='Указанный канал не найден',
+        await bot.send_message(
             chat_id=message.chat.id,
-            message_id=message.message_id
+            text='Указанный канал не найден'
         )
 
     async with aiohttp.ClientSession() as session:
@@ -607,10 +605,9 @@ async def process_subscribe_channel(message, state):
         response = await session.get(f'{URL}/api/subscribe/{channel.id}/{user_id}')
         if response.status == 200:
             await state.finish()
-            await bot.edit_message_text(
-                text=f'Вы уже подписаны на канал @{channel.username}',
+            await bot.send_message(
                 chat_id=message.chat.id,
-                message_id=message.message_id
+                text=f'Вы уже подписаны на канал @{channel.username}'
             )
             return
         data = {"channel_id": channel.id, "user_id": user_id}
@@ -619,10 +616,9 @@ async def process_subscribe_channel(message, state):
             await state.finish()
             return logger.error(await response.text())
 
-    await bot.edit_message_text(
-            text=f"Вы успешно подписались на канал @{channel.username}",
+    await bot.send_message(
             chat_id=message.chat.id,
-            message_id=message.message_id
+            text=f"Вы успешно подписались на канал @{channel.username}"
         )
     await state.finish()
 
@@ -633,19 +629,17 @@ async def process_unsubscribe_channel(message, state):
     channel = await get_channel(message.text)
     if not channel:
         await state.finish()
-        await bot.edit_message_text(
-            text='Указанное значение не является ссылкой на канал или @упоминанием',
+        await bot.send_message(
             chat_id=message.chat.id,
-            message_id=message.message_id
+            text='Указанное значение не является ссылкой на канал или @упоминанием'
         )
     try:
         channel = await bot.get_chat(channel)
     except ChatNotFound:
         await state.finish()
-        await bot.edit_message_text(
-            text='Указанный канал не найден',
+        await bot.send_message(
             chat_id=message.chat.id,
-            message_id=message.message_id
+            text='Указанный канал не найден'
         )
         return
     
@@ -653,20 +647,18 @@ async def process_unsubscribe_channel(message, state):
         response = await session.delete(f'{URL}/api/subscribe/{channel.id}/{user_id}')
         if response.status == 404:
             await state.finish()
-            await bot.edit_message_text(
-                text=f"Вы не подписаны на канал @{channel.username}",
+            await bot.send_message(
                 chat_id=message.chat.id,
-                message_id=message.message_id
+                text=f"Вы не подписаны на канал @{channel.username}"
             )
             return
         elif response.status != 204:
             await state.finish()
             return logger.error(await response.text())
     
-    await bot.edit_message_text(
-            text=f"Вы успешно отписались от канала @{channel.username}",
+    await bot.send_message(
             chat_id=message.chat.id,
-            message_id=message.message_id
+            text=f"Вы успешно отписались от канала @{channel.username}"
         )
     await state.finish()
 
