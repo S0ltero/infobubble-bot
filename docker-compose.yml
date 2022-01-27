@@ -3,9 +3,14 @@ services:
     build: .
     command: python manage.py runserver 0.0.0.0:8000
     ports:
-      - "5432:5432"
+      - "5433:5432"
+      - "8000:8000"
+    volumes:
+      - ./:/app
     env_file:
       - ./.env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     healthcheck:
       test: ["CMD", "curl -f http://0.0.0.0:8000/ || exit 1"]
       interval: 20s
