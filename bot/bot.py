@@ -709,7 +709,7 @@ async def send_news(user, is_subscribe = False):
 
         # Сохраняем новость в базу данных
         has_file = True if data["filename"] else False
-        data = {
+        history_data = {
             'user_id': user_id,
             'message_id': data['message_id'],
             'channel_id': channel,
@@ -718,7 +718,7 @@ async def send_news(user, is_subscribe = False):
         }
 
         async with aiohttp.ClientSession() as session:
-            response = await session.post(url=f'{URL}/api/history/', json=data)
+            response = await session.post(url=f'{URL}/api/history/', json=history_data)
 
         if response.status == 200:
             if not has_file:
