@@ -13,8 +13,6 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.utils.exceptions import ChatNotFound
 from loguru import logger
 
-config = configparser.ConfigParser()
-config.read(path.join(path.dirname(path.abspath(__file__)), 'config.ini'))
 URL = os.getenv('DJANGO_HOST')
 API_TOKEN = os.getenv('TELEGRAM_TOKEN')
 
