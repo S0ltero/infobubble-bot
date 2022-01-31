@@ -39,10 +39,11 @@ print("GRAB - Started")
 
 
 
-def form_data(filename, message_text, channel):
+async def form_data(filename,message_id, message_text, channel):
     if message_text == None:
         message_text = ""
     data = {
+        'message_id': message_id,
         'filename': filename,
         'text': message_text + " \n  Оригинал можно посмотреть на канале @" + channel
     }
@@ -128,7 +129,7 @@ def progress(current, total):
 def bot_news():
     bottest = Client("my_account", api_id, api_hash)
     with bottest:
-        for channel in channels[68:]:
+        for channel in channels:
                 print(channel)
                 i = 0
                 for message in bottest.iter_history(channel, limit=5): 
@@ -138,17 +139,17 @@ def bot_news():
                         chat_from = message.chat if message.chat else (message.get_chat())                   
                         # puth = message.download_media(file=path.join(path.dirname(path.abspath(__file__)), 'downloads'))
                         try:
-                            puth = message.download(progress=progress)
+                            puth = message.download(progress=progress, file=path.join(path.dirname(path.abspath(__file__)), 'downloads'))
                             print(puth)
-                            form_data(puth, message.caption, chat_from.username)
+                            form_data(puth,message.message_id, message.caption, chat_from.username)
                         except:
                             chat_from = message.chat if message.chat else (message.get_chat())
                             print(chat_from.username)
-                            form_data("None",message.text, chat_from.username)
+                            form_data(None,message.message_id, message.text, chat_from.username)
                     else:
                         chat_from = message.chat if message.chat else (message.get_chat())
                         print(chat_from.username)
-                        form_data("None",message.text, chat_from.username)
+                        form_data(None, message.message_id,message.text, chat_from.username)
                     i+=1
                     if i>=4:
                         break
@@ -164,13 +165,13 @@ async def my_event_handler(event):
         try:   
            filiname = message.file.name
            puth = await message.download_media(file=path.join(path.dirname(path.abspath(__file__)), 'downloads'))
-           form_data(puth, message.text, chat_from.username)
+           await form_data(puth, message.text, chat_from.username)
         except:
-           form_data("None",message.text, chat_from.username)
+           await form_data(None,message.text, chat_from.username)
     else:
         chat_from = event.chat if event.chat else (await event.get_chat())
         print(chat_from.username)
-        form_data("None",message.text, chat_from.username)
+        await form_data(None,message.text, chat_from.username)
     
     # await my_channels()
 
