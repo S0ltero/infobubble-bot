@@ -1,4 +1,3 @@
-from types import NoneType
 from pyrogram.types.messages_and_media import message
 from pyrogram import Client
 from telethon import TelegramClient, events
@@ -146,11 +145,11 @@ def bot_news():
                         except:
                             chat_from = message.chat if message.chat else (message.get_chat())
                             print(chat_from.username)
-                            form_data(NoneType,message.message_id, message.text, chat_from.username)
+                            form_data(type(None),message.message_id, message.text, chat_from.username)
                     else:
                         chat_from = message.chat if message.chat else (message.get_chat())
                         print(chat_from.username)
-                        form_data(NoneType, message.message_id,message.text, chat_from.username)
+                        form_data(type(None), message.message_id,message.text, chat_from.username)
                     i+=1
                     if i>=4:
                         break
