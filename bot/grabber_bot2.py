@@ -167,11 +167,11 @@ async def my_event_handler(event):
            puth = await message.download_media(file=path.join(path.dirname(path.abspath(__file__)), 'downloads'))
            await form_data(puth, message.text, chat_from.username)
         except:
-           await form_data(NoneType,message.text, chat_from.username)
+           await form_data(type(None),message.text, chat_from.username)
     else:
         chat_from = event.chat if event.chat else (await event.get_chat())
         print(chat_from.username)
-        await form_data("None",message.text, chat_from.username)
+        await form_data(type(None),message.text, chat_from.username)
     
     # await my_channels()
 
