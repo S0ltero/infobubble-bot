@@ -672,7 +672,7 @@ async def send_news(user, is_subscribe = False):
             channel = random.choice(user["channel_ids"])
         else:
             continue
-        channels_dir = path.join(path.dirname(path.abspath(__file__)), "channels_dump")
+        channels_dir = path.join(path.dirname(path.abspath(__file__)), "downloads")
         channel_file = f"{channel}{random.randint(0, 4)}.json"
 
         if not os.path.exists(path.join(channels_dir, channel_file)):
