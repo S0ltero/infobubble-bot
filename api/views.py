@@ -103,7 +103,7 @@ class ChannelsView(APIView):
     queryset = TelegramChannel
 
     def get(self, request):
-        channel_ids = self.queryset.objects.values_list("channel_id", flat=True)
+        channel_ids = self.queryset.objects.values_list("channel_url", flat=True)
 
         if channel_ids:
             return Response({'channels_ids': channel_ids}, status=status.HTTP_200_OK)
