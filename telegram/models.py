@@ -49,4 +49,4 @@ class UserMessageRate(models.Model):
 
 class UserSubscribe(models.Model):
     user_id = models.ForeignKey(TelegramUser, related_name="subscribes", on_delete=models.CASCADE)
-    channel_id = models.ForeignKey(TelegramChannel, related_name="subscribes", on_delete=models.CASCADE)
+    channel_id = models.ForeignKey(TelegramChannel, related_name="subscribes", to_field="channel_id", on_delete=models.CASCADE)
