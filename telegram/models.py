@@ -38,7 +38,7 @@ class HistoryMessage(models.Model):
 
 class UserMessageRate(models.Model):
     message_id = models.CharField(verbose_name="ID сообщения", max_length=130)
-    channel_id = models.ForeignKey(TelegramChannel, on_delete=models.CASCADE)
+    channel_id = models.ForeignKey(TelegramChannel, related_name="rate", to_field="channel_id", on_delete=models.CASCADE)
     user_id = models.ForeignKey(TelegramUser, on_delete=models.CASCADE)
     rate = models.BooleanField(verbose_name="Оценка сообщения")
 
