@@ -13,7 +13,8 @@ class TelegramUser(models.Model):
 
 
 class TelegramChannel(models.Model):
-    id = models.CharField(verbose_name="ID telegram канала", max_length=130, primary_key=True)
+    channel_id = models.CharField(verbose_name="ID telegram канала", max_length=130, null=True, blank=True)
+    channel_url = models.CharField(verbose_name="Ссылка на канал", max_length=130, null=True, blank=True)
     title = models.CharField(verbose_name="Название канала", max_length=130, null=True, blank=True)
     tags = ArrayField(models.CharField(max_length=150), blank=True, verbose_name='Тэги канала')
 
