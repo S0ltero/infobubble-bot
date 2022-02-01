@@ -18,7 +18,7 @@ class TelegramUserSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def get_channel_ids(self, obj):
-        channel_ids = TelegramChannel.objects.filter(tags__overlap=obj.filters).values_list("id", flat=True)
+        channel_ids = TelegramChannel.objects.filter(tags__overlap=obj.filters).values_list("channel_id", flat=True)
         return channel_ids
 
     def get_subscribe_ids(self, obj):
