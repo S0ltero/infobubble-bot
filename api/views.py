@@ -81,7 +81,7 @@ class ChannelView(APIView):
 
     def get(self, request, channel_id):
         try:
-            channel = self.queryset.objects.get(id=channel_id)
+            channel = self.queryset.objects.get(channel_id=channel_id)
         except TelegramChannel.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
