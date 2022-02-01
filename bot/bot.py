@@ -594,7 +594,7 @@ async def process_subscribe_channel(message, state):
     async with aiohttp.ClientSession() as session:
         response = await session.get(f'{URL}/api/channel/{channel.id}')
         if response.status == 404:
-            data = {"id": channel.id, "title": channel.title, "tags": []}
+            data = {"channel_id": channel.id, "channel_url": "test", "title": channel.title, "tags": []}
             response = await session.post(f'{URL}/api/channel/', json=data)
             if response != 201:
                 await state.finish()
