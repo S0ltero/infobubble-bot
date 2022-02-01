@@ -175,7 +175,8 @@ async def complete_click_inline(call):
             'Если возникнут проблемы, ты всегда можешь заручиться моей поддержкой, написав /help'
         )
         await bot.send_message(call.from_user.id, text)
-        await send_news(response.json())
+        user = await response.json()
+        await send_news(user)
 
 
 @dp.callback_query_handler(lambda call: call.data.startswith('like'))
