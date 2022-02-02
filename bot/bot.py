@@ -718,7 +718,7 @@ async def send_news(user, is_subscribe = False):
         async with aiohttp.ClientSession() as session:
             response = await session.post(url=f'{URL}/api/history/', json=history_data)
 
-        if response.status == 200:
+        if response.status == 201:
             if not has_file:
                 await bot.send_message(user_id, data['text'], reply_markup=markup)
             else:
