@@ -25,7 +25,7 @@ class TelegramChannel(models.Model):
 
 class HistoryMessage(models.Model):
     message_id = models.CharField(verbose_name="ID сообщения", max_length=130)
-    channel_id = models.OneToOneField(TelegramChannel, related_name="history", to_field='channel_id', unique=True, on_delete=models.CASCADE)
+    channel_id = models.ForeignKey(TelegramChannel, related_name="history", to_field='channel_id', on_delete=models.CASCADE)
     user_id = models.ForeignKey(TelegramUser, related_name="history", on_delete=models.CASCADE)
     text = models.TextField(verbose_name="Текст сообщения")
     has_file = models.BooleanField(verbose_name="Содержит файл?")
@@ -38,7 +38,7 @@ class HistoryMessage(models.Model):
 
 class UserMessageRate(models.Model):
     message_id = models.CharField(verbose_name="ID сообщения", max_length=130)
-    channel_id = models.OneToOneField(TelegramChannel, related_name="rate", to_field="channel_id", unique=True, on_delete=models.CASCADE)
+    channel_id = models.ForeignKey(TelegramChannel, related_name="rate", to_field="channel_id", on_delete=models.CASCADE)
     user_id = models.ForeignKey(TelegramUser, on_delete=models.CASCADE)
     rate = models.BooleanField(verbose_name="Оценка сообщения")
 
@@ -49,4 +49,4 @@ class UserMessageRate(models.Model):
 
 class UserSubscribe(models.Model):
     user_id = models.ForeignKey(TelegramUser, related_name="subscribes", on_delete=models.CASCADE)
-    channel_id = models.OneToOneField(TelegramChannel, related_name="subscribes", to_field="channel_id", unique=True, on_delete=models.CASCADE)
+    channel_id = models.ForeignKey(TelegramChannel, related_name="subscribes", to_field="channel_id", on_delete=models.CASCADE)
