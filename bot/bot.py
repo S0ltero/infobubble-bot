@@ -672,8 +672,11 @@ async def send_news(user, is_subscribe = False):
             channel = random.choice(user["channel_ids"])
         else:
             continue
+
+        channel = await bot.get_chat(channel)
+
         channels_dir = path.join(path.dirname(path.abspath(__file__)), "downloads")
-        channel_file = f"{channel}{random.randint(0, 4)}.json"
+        channel_file = f"{channel.username}{random.randint(0, 4)}.json"
 
         if not os.path.exists(path.join(channels_dir, channel_file)):
             continue
@@ -689,7 +692,7 @@ async def send_news(user, is_subscribe = False):
             continue
         else:
             async with aiohttp.ClientSession() as session:
-                response = await session.get(url=f'{URL}/api/history/{user_id}/{channel}/{data["message_id"]}')
+                response = await session.get(url=f'{URL}/api/history/{user_id}/{channel.id}/{data["message_id"]}')
             if response.status == 200:
                 user_history[user_id].append(data["message_id"])
                 continue
@@ -701,8 +704,8 @@ async def send_news(user, is_subscribe = False):
 
         # Добавляем inline кнопки
         markup = types.InlineKeyboardMarkup(row_width=2)
-        markup.add(types.InlineKeyboardButton('❤️', callback_data=f'like_{channel}'))
-        markup.add(types.InlineKeyboardButton('👎', callback_data=f'nolike_{channel}'))
+        markup.add(types.InlineKeyboardButton('❤️', callback_data=f'like_{channel.id}'))
+        markup.add(types.InlineKeyboardButton('👎', callback_data=f'nolike_{channel.id}'))
         markup.add(types.InlineKeyboardButton('Далее', callback_data='next'))
 
         # Сохраняем новость в базу данных
@@ -710,7 +713,7 @@ async def send_news(user, is_subscribe = False):
         history_data = {
             'user_id': user_id,
             'message_id': data['message_id'],
-            'channel_id': channel,
+            'channel_id': channel.id,
             'text': data['text'],
             'has_file': has_file
         }
