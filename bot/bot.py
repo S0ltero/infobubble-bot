@@ -736,16 +736,19 @@ async def send_news(user, is_subscribe = False):
 async def day_news():
     while True:
         async with aiohttp.ClientSession() as session:
-            async with session.get(url=f'{URL}/api/users/') as response:
-                if response.status == 200:
-                    users = await response.json()
-                elif response.status == 404:
-                    return logger.error("Пользователи не найдены")
-                else:
-                    return logger.error(await response.text())
+            try:
+                async with session.get(url=f'{URL}/api/users/') as response:
+                    if response.status == 200:
+                        users = await response.json()
+                    elif response.status == 404:
+                        logger.error("Пользователи не найдены")
+                    else:
+                        logger.error(await response.text())
+            except aiohttp.ClientConnectionError:
+                continue
 
         for user in users:
-            asyncio.ensure_future(send_news(user, is_subscribe=True))
+            asyncio.ensure_future(send_news(user))
         
         await asyncio.sleep(86400)
 
@@ -753,13 +756,16 @@ async def day_news():
 async def subscribe_news():
     while True:
         async with aiohttp.ClientSession() as session:
-            async with session.get(url=f'{URL}/api/users/') as response:
-                if response.status == 200:
-                    users = await response.json()
-                elif response.status == 404:
-                    return logger.error("Пользователи не найдены")
-                else:
-                    return logger.error(await response.text())
+            try:
+                async with session.get(url=f'{URL}/api/users/') as response:
+                    if response.status == 200:
+                        users = await response.json()
+                    elif response.status == 404:
+                        logger.error("Пользователи не найдены")
+                    else:
+                        logger.error(await response.text())
+            except aiohttp.ClientConnectionError:
+                continue
 
         for user in users:
             asyncio.ensure_future(send_news(user, is_subscribe=True))
