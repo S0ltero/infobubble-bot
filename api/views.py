@@ -98,6 +98,21 @@ class ChannelView(APIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def patch(self, request):
+        data = request.data
+
+        try:
+            channel = self.queryset.objects.get(channel_url=data['channel_url'])
+        except TelegramChannel.DoesNotExist:
+            return Response(f'Канал с url: {data["channel_url"]} не найден', status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = self.serializer_class(channel, data=data)
+        if serializer.is_valid(raise_exception=False):
+            serializer.update(channel, serializer.validated_data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class ChannelsView(APIView):
     queryset = TelegramChannel
