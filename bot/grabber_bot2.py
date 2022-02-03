@@ -25,9 +25,11 @@ my_channel_id = "pskovhacktest_1"
 data = {
         'token': API_TOKEN
     }
-responce = requests.post(url=f'{URL}/api/channels/', json=data)
+responce = requests.get(url=f'{URL}/api/channels/', json=data)
+print("SDAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+print(responce.json())
 channels = responce.json()['channels_ids']
-channels.append("pskovhacktest_1")
+#channels.append("pskovhacktest_1")
 print(channels)
 # channels = ["hghtest6","pskovhacktest2", "testphtest", "pskovhacktest_1"]
  
@@ -39,7 +41,7 @@ print("GRAB - Started")
 
 
 
-async def form_data(filename,message_id, message_text, channel):
+def form_data(filename,message_id, message_text, channel):
     if message_text == None:
         message_text = ""
     data = {
@@ -48,7 +50,7 @@ async def form_data(filename,message_id, message_text, channel):
         'text': message_text + " \n  Оригинал можно посмотреть на канале @" + channel
     }
     print(data)
-    channel = str(path.join(path.dirname(path.abspath(__file__)),str(channel)))
+    channel = str(path.join(path.dirname(path.abspath(__file__)),"downloads",str(channel)))
     if (os.path.exists(channel+"0"+".json")):
         if (os.path.exists(channel+"1"+".json")):
             if(os.path.exists(channel+"2"+".json")):
@@ -135,17 +137,19 @@ def bot_news():
                 for message in bottest.iter_history(channel, limit=5): 
                     print(message)
                     if message.media:
-                        print(message.media)
-                        chat_from = message.chat if message.chat else (message.get_chat())                   
-                        # puth = message.download_media(file=path.join(path.dirname(path.abspath(__file__)), 'downloads'))
+                       
                         try:
-                            puth = message.download(progress=progress, file=path.join(path.dirname(path.abspath(__file__)), 'downloads'))
+                            chat_from = message.chat if message.chat else (message.get_chat())
+                            puth = message.download(progress=progress, block=True)
                             print(puth)
                             form_data(puth,message.message_id, message.caption, chat_from.username)
                         except:
                             chat_from = message.chat if message.chat else (message.get_chat())
                             print(chat_from.username)
                             form_data(None,message.message_id, message.text, chat_from.username)
+
+                        print(message.media)
+                                           
                     else:
                         chat_from = message.chat if message.chat else (message.get_chat())
                         print(chat_from.username)
