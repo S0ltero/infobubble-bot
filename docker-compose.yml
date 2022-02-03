@@ -26,3 +26,14 @@ services:
       - ./:/app
     env_file:
       - ./.env
+    depends_on:
+      - web
+  grabber:
+    build: ./
+    command: python bot/grabber.py
+    volumes:
+      - ./:/app
+    env_file:
+      - ./.env
+    depends_on:
+      - web
