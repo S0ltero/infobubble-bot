@@ -473,6 +473,7 @@ async def process_add_filter_words(message, state):
                 return logger.error(await response.text())
     
     add_words = list(map(lambda x: x.strip(), message.text.split(',')))
+    add_words = list(map(lambda x: x.lower(), add_words))
     if user.get('filter_words'):
         words = [*user['filter_words'], *add_words]
     else:
@@ -510,6 +511,7 @@ async def process_remove_filter_words(message, state):
                 return logger.error(await response.text())
     
     remove_words = list(map(lambda x: x.strip(), message.text.split(',')))
+    remove_words = list(map(lambda x: x.lower(), remove_words))
     words = [word for word in user['filter_words'] if word not in remove_words]
 
     data = {
