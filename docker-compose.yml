@@ -1,6 +1,6 @@
 services:
   web:
-    build: .
+    build: ./
     command: >
       sh -c "python manage.py makemigrations &&
              python manage.py migrate &&
@@ -20,7 +20,7 @@ services:
       timeout: 5s
       retries: 5
   bot:
-    build: .
+    build: ./
     command: python bot/bot.py
     volumes:
       - ./:/app
