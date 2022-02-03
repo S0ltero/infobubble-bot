@@ -680,7 +680,7 @@ async def send_news(user, is_subscribe = False):
         except ChatNotFound:
             async with aiohttp.ClientSession() as session:
                 response = await session.get(url=f'{URL}/api/channel/{channel}')
-                channel = await response.json()['channel_url']
+                channel = (await response.json())['channel_url']
                 channel = await bot.get_chat(channel)
 
         channels_dir = Path(__file__).parent / "downloads"
