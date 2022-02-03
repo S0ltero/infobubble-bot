@@ -707,7 +707,7 @@ async def send_news(user, is_subscribe = False):
 
         # Проверяем содержит ли новость фильтруемые слова
         if user.get("filter_words"):
-            if any(word for word in user["filter_words"] in data["text"]):
+            if any(word for word in user["filter_words"] if word in data["text"].lower()):
                 continue
 
         # Добавляем inline кнопки
