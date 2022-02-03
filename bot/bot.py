@@ -402,7 +402,7 @@ async def filter_words(message):
         types.InlineKeyboardButton('Удалить слова-фильтры', callback_data='remove_filter_words')
     )
 
-    text = ('Слова-фильтры позволяют исключать новости содержащие одно или несколько ключевых слов.\n\n'
+    text = ('Фильтрация. Слова-фильтры позволяют исключать новости, содержащие те ключевые слова, которые Вы укажете. \n\n'
             'Выберите действие')
 
     await bot.send_message(message.chat.id, text, reply_markup=markup)
@@ -424,10 +424,10 @@ async def add_filter_words(call):
     await AddFilterWords.words.set()
 
     if not user.get('filter_words'):
-        text = ('Укажите через запятую слова фильтры, которые желаете добавить.\n\n'
+        text = ('Укажите слова-фильтры, которые нужно добавить, через запятую с пробелом (прим.: реклама, инвестиции). \n\n'
                 'Текущие слова фильтры: отсутствуют')
     else:
-        text = ('Укажите через запятую слова фильтры, которые желаете добавить.\n\n'
+        text = ('Укажите слова-фильтры, которые нужно добавить, через запятую с пробелом (прим.: реклама, инвестиции). \n\n'
                 'Текущие слова фильтры: ' + ', '.join(user['filter_words']))
 
     await bot.send_message(chat_id, text)
@@ -450,10 +450,10 @@ async def remove_filter_words(call):
     await RemoveFilterWords.words.set()
 
     if not user.get('filter_words'):
-        text = ('Укажите через запятую слова фильтры, которые желаете удалить.\n\n'
+        text = ('Укажите через запятую с пробелом слова-фильтры, которые нужно удалить (прим.: реклама, инвестиции). \n\n'
                 'Текущие слова фильтры: отсутствуют')
     else:
-        text = ('Укажите через запятую слова фильтры, которые желаете удалить.\n\n'
+        text = ('Укажите через запятую с пробелом слова-фильтры, которые нужно удалить (прим.: реклама, инвестиции). \n\n'
                 'Текущие слова фильтры: ' + ', '.join(user['filter_words']))
 
     await bot.send_message(chat_id, text)
@@ -548,7 +548,7 @@ async def subscribes(message):
         types.InlineKeyboardButton('Удалить канал', callback_data='unsubscribe')
     )
 
-    await bot.send_message(message.chat.id, 'Выберите действие', reply_markup=markup)
+    await bot.send_message(message.chat.id, 'Вы можете добавить каналы, с которых Вам будут приходить новости. Данные новости обновляются с публикацией их на каланах подписки, а не в стандартной логике.', reply_markup=markup)
 
 
 @dp.callback_query_handler(lambda call: call.data == 'subscribe')
@@ -556,7 +556,7 @@ async def subscribe_click_inline(call):
     # Set state
     await SubscribeForm.channel.set()
 
-    text = 'Отправьте @упоминание или ссылку на канал'
+    text = 'Чтобы добавить канал, отправьте @упоминание или ссылку на канал, с которого (Вы) хотите получать новости.'
 
     await bot.delete_message(call.message.chat.id, call.message.message_id)
     await bot.send_message(call.message.chat.id, text)
@@ -567,7 +567,7 @@ async def unsubscribe_click_inline(call):
     # Set state
     await UnsubscribeForm.channel.set()
 
-    text = 'Отправьте @упоминание или ссылку на канал'
+    text = 'Чтобы удалить канал, отправьте @упоминание или ссылку на него.'
 
     await bot.delete_message(call.message.chat.id, call.message.message_id)
     await bot.send_message(call.message.chat.id, text)
@@ -581,7 +581,7 @@ async def process_subscribe_channel(message, state):
         await state.finish()
         await bot.send_message(
             chat_id=message.chat.id,
-            text='Указанное значение не является ссылкой на канал или @упоминанием'
+            text='Указанное значение не является @упоминанием или ссылкой на канал. Пожалуйста, попробуйте ввести другое значение.'
         )
 
     try:
@@ -590,7 +590,7 @@ async def process_subscribe_channel(message, state):
         await state.finish()
         await bot.send_message(
             chat_id=message.chat.id,
-            text='Указанный канал не найден'
+            text='К сожалению, указанный канал не найден.'
         )
 
     async with aiohttp.ClientSession() as session:
