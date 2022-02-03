@@ -25,10 +25,16 @@ my_channel_id = "pskovhacktest_1"
 data = {
         'token': API_TOKEN
     }
-responce = requests.get(url=f'{URL}/api/channels/', json=data)
-print("SDAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-print(responce.json())
-channels = responce.json()['channels_ids']
+try:
+    responce = requests.get(url=f'{URL}/api/channels/', json=data)
+    print("SDAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+    print(responce.json())
+    channels = responce.json()['channels_ids']
+except:
+    responce = requests.get(url=f'{URL}/api/channels/', json=data)
+    print("SDAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+    print(responce.json())
+    channels = responce.json()['channels_ids']
 #channels.append("pskovhacktest_1")
 print(channels)
 # channels = ["hghtest6","pskovhacktest2", "testphtest", "pskovhacktest_1"]
@@ -142,7 +148,7 @@ def bot_news():
                             chat_from = message.chat if message.chat else (message.get_chat())
                             puth = message.download(progress=progress, block=True)
                             print(puth)
-                            form_data(puth,message.message_id, message.caption, chat_from.username)
+                            form_data(puth[26:],message.message_id, message.caption, chat_from.username)
                         except:
                             chat_from = message.chat if message.chat else (message.get_chat())
                             print(chat_from.username)
@@ -157,6 +163,7 @@ def bot_news():
                     i+=1
                     if i>=4:
                         break
+
 # @client.on(events.NewMessage(chats=channels))
 async def my_event_handler(event):
     
@@ -186,8 +193,11 @@ async def my_channels():
     for i in channels:
         print(i)
         await client(JoinChannelRequest(i))
-
+#client = TelegramClient('myGrab', api_id, api_hash)
+#client.start()
+#asyncio.run(my_channels())
 bot_news()
+
 # client.start()
 
 # client.run_until_disconnected()
