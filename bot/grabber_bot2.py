@@ -25,16 +25,17 @@ my_channel_id = "pskovhacktest_1"
 data = {
         'token': API_TOKEN
     }
-try:
-    responce = requests.get(url=f'{URL}/api/channels/', json=data)
-    print("SDAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-    print(responce.json())
-    channels = responce.json()['channels_ids']
-except:
-    responce = requests.get(url=f'{URL}/api/channels/', json=data)
-    print("SDAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-    print(responce.json())
-    channels = responce.json()['channels_ids']
+
+while True:
+    try:
+        responce = requests.get(url=f'{URL}/api/channels/', json=data)
+        print(responce.json())
+        channels = responce.json()['channels_ids']
+    except:
+        print("NO API")
+    else:   
+      break  
+
 #channels.append("pskovhacktest_1")
 print(channels)
 # channels = ["hghtest6","pskovhacktest2", "testphtest", "pskovhacktest_1"]
