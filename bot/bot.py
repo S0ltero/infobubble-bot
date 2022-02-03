@@ -3,7 +3,7 @@ import asyncio
 import random
 import re
 import os
-from os import path
+from pathlib import Path
 
 import aiohttp
 from aiogram import Bot, Dispatcher, executor, types
@@ -683,13 +683,14 @@ async def send_news(user, is_subscribe = False):
                 channel = await response.json()['channel_url']
                 channel = await bot.get_chat(channel)
 
-        channels_dir = path.join(path.dirname(path.abspath(__file__)), "downloads")
+        channels_dir = Path(__file__).parent / "downloads"
         channel_file = f"{channel.username}{random.randint(0, 4)}.json"
+        channel_file = channels_dir / channel_file
 
-        if not os.path.exists(path.join(channels_dir, channel_file)):
+        if not channel_file.exists():
             continue
 
-        with open(path.join(channels_dir, channel_file), 'r', encoding='utf-8') as fh:
+        with open(channel_file) as fh:
             data = json.load(fh)
 
         # Проверяем отправлялась ли новость раньше
@@ -733,10 +734,11 @@ async def send_news(user, is_subscribe = False):
             if not has_file:
                 await bot.send_message(user_id, data['text'], reply_markup=markup)
             else:
-                if path.join(path.dirname(path.abspath(__file__)), data['filename']).endswith('.mp4'):
-                    await bot.send_video(user_id,open(path.join(path.dirname(path.abspath(__file__)), data['filename']), 'rb'), caption=data['text'], reply_markup=markup)           
+                file_path = channel_file.parent / data['filename']
+                if file_path.suffix == '.mp4':
+                    await bot.send_video(user_id, file_path.open('rb'), caption=data['text'], reply_markup=markup)           
                 else:
-                    await bot.send_photo(user_id,open(path.join(path.dirname(path.abspath(__file__)), data['filename']), 'rb'), caption=data['text'], reply_markup=markup)
+                    await bot.send_photo(user_id, file_path.open('rb'), caption=data['text'], reply_markup=markup)
 
             user_history[user_id].append(data['message_id'])
             return
