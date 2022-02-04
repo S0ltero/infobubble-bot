@@ -3,13 +3,14 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 
-from telegram.models import TelegramChannel, TelegramUser, HistoryMessage, UserSubscribe
+from telegram.models import TelegramChannel, TelegramUser, HistoryMessage, UserSubscribe, Config
 from telegram.serializers import (
     TelegramUserSerializer,
     TelegramChannelSerializer,
     HistoryMessageSerializer,
     UserMessageRateSerializer,
-    UserSubscribeSerializer
+    UserSubscribeSerializer,
+    ConfigSerializer
 )
 
 
@@ -208,3 +209,24 @@ class UserSubscribeView(APIView):
         
         subscribe.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ConfigView(APIView):
+    queryset = Config
+    serializer_class = ConfigSerializer
+
+    def get(self, request):
+        config, created = self.queryset.objects.get_or_create(id=0)
+        serializer = self.serializer_class(config)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def patch(self, request):
+        data = request.data
+        config = self.queryset.objects.first()
+
+        serializer = self.serializer_class(config, data=data)
+        if serializer.is_valid(raise_exception=False):
+            serializer.update(config, serializer.validated_data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
