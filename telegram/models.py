@@ -1,6 +1,15 @@
 from django.contrib.postgres.fields import ArrayField
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.db import models
+
+
+def validate_channel_url(value: str):
+    if not value.startswith('@'):
+        raise ValidationError(
+            f'{value} is not @username of telegram channel',
+            params={'value': value}
+        )
 
 
 class TelegramUser(models.Model):
@@ -14,8 +23,22 @@ class TelegramUser(models.Model):
 
 
 class TelegramChannel(models.Model):
-    channel_id = models.CharField(verbose_name="ID telegram канала", max_length=130, unique=True, null=True, blank=True)
-    channel_url = models.CharField(verbose_name="Ссылка на канал", max_length=130, unique=True, null=True, blank=True)
+    channel_id = models.CharField(
+        verbose_name="ID telegram канала",
+        max_length=130,
+        unique=True,
+        null=True,
+        blank=True
+    )
+    channel_url = models.CharField(
+        verbose_name="Ссылка на канал",
+        max_length=130,
+        unique=True,
+        null=True,
+        blank=True,
+        help_text='Пример: @testchannel',
+        validators=(validate_channel_url,)
+    )
     title = models.CharField(verbose_name="Название канала", max_length=130, null=True, blank=True)
     tags = ArrayField(models.CharField(max_length=150), blank=True, verbose_name='Тэги канала')
 
