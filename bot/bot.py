@@ -4,6 +4,7 @@ import random
 import re
 import os
 from pathlib import Path
+from datetime import datetime
 
 import aiohttp
 from aiogram import Bot, Dispatcher, executor, types
@@ -750,20 +751,38 @@ async def day_news():
     while True:
         async with aiohttp.ClientSession() as session:
             try:
-                async with session.get(url=f'{URL}/api/users/') as response:
-                    if response.status == 200:
-                        users = await response.json()
-                    elif response.status == 404:
-                        logger.error("Пользователи не найдены")
-                    else:
-                        logger.error(await response.text())
+                response = await session.get(url=f'{URL}/api/config/')
             except aiohttp.ClientConnectionError:
                 continue
 
-        for user in users:
-            asyncio.ensure_future(send_news(user))
-        
-        await asyncio.sleep(86400)
+            dt_now = datetime.now()
+            dt_last_sent = (await response.json())['last_sent']
+            dt_last_sent = datetime.strptime(dt_last_sent, '%Y-%m-%d')
+
+            if dt_now.day == dt_last_sent.day:
+                logger.info('Await next day to send everyday news')
+                await asyncio.sleep(86400)
+                continue
+
+            try:
+                response = await session.get(url=f'{URL}/api/users/')
+            except aiohttp.ClientConnectionError:
+                continue
+
+            if response.status == 200:
+                users = await response.json()
+            elif response.status == 404:
+                logger.error("Пользователи не найдены")
+            else:
+                logger.error(await response.text())
+
+            for user in users:
+                asyncio.ensure_future(send_news(user))
+
+            data = {'last_sent': str(dt_now.date())}
+            response = await session.patch(url=f'{URL}/api/config/', json=data)
+
+            await asyncio.sleep(86400)
 
 
 async def subscribe_news():
