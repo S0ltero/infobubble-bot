@@ -1,4 +1,5 @@
 from django.contrib.postgres.fields import ArrayField
+from django.utils import timezone
 from django.db import models
 
 
@@ -50,3 +51,11 @@ class UserMessageRate(models.Model):
 class UserSubscribe(models.Model):
     user_id = models.ForeignKey(TelegramUser, related_name="subscribes", on_delete=models.CASCADE)
     channel_id = models.ForeignKey(TelegramChannel, related_name="subscribes", to_field="channel_id", on_delete=models.CASCADE)
+
+
+class Config(models.Model):
+    last_sent = models.DateField(verbose_name='Дата последнего напоминания', default=timezone.now)
+
+    class Meta:
+        verbose_name = 'Настройка'
+        verbose_name_plural = 'Настройки'
