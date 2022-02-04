@@ -5,7 +5,8 @@ from .models import (
     TelegramChannel,
     HistoryMessage,
     UserMessageRate,
-    UserSubscribe
+    UserSubscribe,
+    Config
 )
 
 
@@ -51,4 +52,11 @@ class UserSubscribeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserSubscribe
+        fields = "__all__"
+
+
+class ConfigSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Config
         fields = "__all__"
