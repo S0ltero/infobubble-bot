@@ -10,7 +10,7 @@ import aiohttp
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher.filters.state import State, StatesGroup
-from aiogram.utils.exceptions import ChatNotFound
+from aiogram.utils.exceptions import ChatNotFound, BadRequest
 from loguru import logger
 
 URL = os.getenv('DJANGO_HOST')
@@ -718,8 +718,34 @@ async def send_news(user, is_subscribe = False):
         markup.add(types.InlineKeyboardButton('👎', callback_data=f'nolike_{channel.id}'))
         markup.add(types.InlineKeyboardButton('Далее', callback_data='next'))
 
-        # Сохраняем новость в базу данных
         has_file = True if data["filename"] else False
+        file_path = channel_file.parent / data["filename"]
+
+        try:
+            if not has_file:
+                await bot.send_message(
+                    user_id,
+                    data['text'], 
+                    reply_markup=markup
+                )
+            elif file_path.suffix == '.mp4':
+                await bot.send_video(
+                    user_id,
+                    file_path.open('rb'),
+                    caption=data['text'],
+                    reply_markup=markup
+                )           
+            else:
+                await bot.send_photo(
+                    user_id,
+                    file_path.open('rb'),
+                    caption=data['text'],
+                    reply_markup=markup
+                )
+        except BadRequest as e:
+            return logger.error(e)
+
+        # Сохраняем новость в базу данных
         history_data = {
             'user_id': user_id,
             'message_id': data['message_id'],
@@ -730,20 +756,9 @@ async def send_news(user, is_subscribe = False):
 
         async with aiohttp.ClientSession() as session:
             response = await session.post(url=f'{URL}/api/history/', json=history_data)
-
-        if response.status == 201:
-            if not has_file:
-                await bot.send_message(user_id, data['text'], reply_markup=markup)
-            else:
-                file_path = channel_file.parent / data['filename']
-                if file_path.suffix == '.mp4':
-                    await bot.send_video(user_id, file_path.open('rb'), caption=data['text'], reply_markup=markup)           
-                else:
-                    await bot.send_photo(user_id, file_path.open('rb'), caption=data['text'], reply_markup=markup)
-
             user_history[user_id].append(data['message_id'])
-            return
-        else:
+        
+        if response.status != 201:
             return logger.error(await response.text())
 
 
