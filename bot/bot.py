@@ -759,8 +759,11 @@ async def send_news(user, is_subscribe=False):
         markup.add(types.InlineKeyboardButton("👎", callback_data=f"nolike_{channel.id}"))
         markup.add(types.InlineKeyboardButton("Далее", callback_data="next"))
 
-        has_file = True if data["filename"] else False
-        file_path = channel_file.parent / data["filename"]
+        if data["filename"]:
+            has_file = True
+            file_path = channel_file.parent / data["filename"]
+        else:
+            has_file = False
 
         try:
             if not has_file:
