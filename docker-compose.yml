@@ -1,39 +1,94 @@
+version: '3.8'
+
 services:
   web:
-    build: ./
+    build:
+      dockerfile: ./backend/Dockerfile
+      context: ./
     command: >
-      sh -c "python manage.py makemigrations &&
-             python manage.py migrate &&
-             python manage.py runserver 0.0.0.0:8000"
+      sh -c "python manage.py collectstatic --noinput &&
+             gunicorn project.wsgi:application --bind 0.0.0.0:8000"
     ports:
-      - "5433:5432"
-      - "8000:8000"
+      - 5433:5432
+    expose:
+      - 8000
     volumes:
-      - ./:/app
+      - ./backend:/home/app
+      - static_volume:/home/app/staticfiles
+      - media_volume:/home/app/mediafiles
     env_file:
       - ./.env
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    healthcheck:
-      test: ["CMD", "curl -f http://0.0.0.0:8000/ || exit 1"]
-      interval: 20s
-      timeout: 5s
-      retries: 5
+    depends_on:
+      - redis
+  redis:
+    image: redis:alpine
+  celery:
+    build:
+      dockerfile: ./backend/Dockerfile
+      context: ./
+    command: celery -A project worker -B -l info
+    volumes:
+      - ./backend:/home/app
+      - media_volume:/home/app/mediafiles
+    ports:
+      - 5432
+    env_file:
+      - ./.env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - redis
+  celery-beat:
+    build:
+      dockerfile: ./backend/Dockerfile
+      context: ./
+    command: celery -A core beat -l info
+    volumes:
+      - ./backend:/home/app
+      - media_volume:/home/app/mediafiles
+    ports:
+      - 5432
+    env_file:
+      - ./.env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - redis
+  nginx:
+    build: ./nginx
+    volumes:
+      - static_volume:/app/web/staticfiles
+      - media_volume:/app/web/mediafiles
+    ports:
+      - 8001:80
+    depends_on:
+      - web
   bot:
-    build: ./
-    command: python bot/bot.py
+    build:
+      dockerfile: ./bot/Dockerfile
+      context: ./
+    command: python main.py
     volumes:
-      - ./:/app
+      - ./bot:/home/app
+      - media_volume:/home/app/media
     env_file:
       - ./.env
     depends_on:
-      - web
+      - nginx
   grabber:
-    build: ./
-    command: python bot/grabber.py
+    build:
+      dockerfile: ./grabber/Dockerfile
+      context: ./
+    command: python grabber.py
     volumes:
-      - ./:/app
+      - ./grabber:/home/app
     env_file:
       - ./.env
     depends_on:
-      - web
+      - nginx
+
+volumes:
+  static_volume:
+  media_volume:
