@@ -10,6 +10,7 @@ import aiohttp
 from loguru import logger
 
 API_TOKEN = os.getenv("TELEGRAM_TOKEN")
+URL = os.getenv("DJANGO_HOST")
 
 bot = Bot(token=API_TOKEN)
 
@@ -20,9 +21,6 @@ class SubscribeForm(StatesGroup):
 
 class UnsubscribeForm(StatesGroup):
     channel = State()
-
-
-URL = os.getenv("DJANGO_HOST")
 
 
 async def get_channel(text: str):
