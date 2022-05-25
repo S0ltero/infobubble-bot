@@ -2,6 +2,7 @@ import os
 
 from aiogram import Bot, Dispatcher
 from aiogram import types
+from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
 import aiohttp
@@ -20,7 +21,7 @@ class RemoveFilterWords(StatesGroup):
     words = State()
 
 
-async def filter_words(call):
+async def filter_words(call: types.CallbackQuery):
     user_id = call.from_user.id
     if isinstance(call, types.CallbackQuery):
         await bot.answer_callback_query(call.id)
@@ -53,7 +54,7 @@ async def filter_words(call):
     await bot.send_message(chat_id, text, reply_markup=markup)
 
 
-async def add_filter_words(call):
+async def add_filter_words(call: types.CallbackQuery):
     user_id = call.from_user.id
     chat_id = call.message.chat.id
     message_id = call.message.message_id
@@ -82,7 +83,7 @@ async def add_filter_words(call):
     await bot.delete_message(chat_id, message_id)
 
 
-async def remove_filter_words(call):
+async def remove_filter_words(call: types.CallbackQuery):
     user_id = call.from_user.id
     chat_id = call.message.chat.id
     message_id = call.message.message_id
@@ -142,7 +143,7 @@ async def process_add_filter_words(message: types.Message, state: FSMContext):
     await bot.send_message(message.chat.id, text="Слова фильтры успешно изменены!")
 
 
-async def process_remove_filter_words(message, state):
+async def process_remove_filter_words(message: types.Message, state: FSMContext):
     user_id = message.from_user.id
 
     async with aiohttp.ClientSession() as session:
