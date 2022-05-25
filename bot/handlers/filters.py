@@ -170,7 +170,6 @@ async def change_filters(call: types.CallbackQuery, state: FSMContext):
                 return logger.error(await response.text())
 
     await FiltersForm.filters.set()
-    state = dp.current_state(chat=chat_id, user=user_id)
     async with state.proxy() as data:
         data["filters"] = existing_filters
 
@@ -288,7 +287,8 @@ def setup(dp: Dispatcher):
     # Query handlers
     dp.register_callback_query_handler(
         change_filters,
-        lambda call: call.data == "filters"
+        lambda call: call.data == "filters",
+        state="*"
     )
     dp.register_callback_query_handler(
         filter_click_inline,
