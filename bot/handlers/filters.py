@@ -9,6 +9,8 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 import aiohttp
 from loguru import logger
 
+from news import get_news
+
 API_TOKEN = os.getenv("TELEGRAM_TOKEN")
 URL = os.getenv("DJANGO_HOST")
 
