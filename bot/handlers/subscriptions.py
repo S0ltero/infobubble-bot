@@ -200,5 +200,5 @@ def setup(dp: Dispatcher):
     )
     dp.register_callback_query_handler(
         unsubscribe_click_inline,
-        lambda call: call.data == "unsubscribes"
+        lambda call: call.data == "unsubscribe"
     )
