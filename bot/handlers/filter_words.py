@@ -23,7 +23,7 @@ class RemoveFilterWords(StatesGroup):
 async def filter_words(call):
     user_id = call.from_user.id
     if isinstance(call, types.CallbackQuery):
-        await Client.answer_callback_query(call.id)
+        await bot.answer_callback_query(call.id)
         chat_id = call.message.chat.id
     else:
         chat_id = call.chat.id
@@ -33,7 +33,7 @@ async def filter_words(call):
         async with session.get(f"{URL}/api/users/{user_id}/") as response:
             if response.status != 200:
                 text = "Вы ещё не проходили настройку.\nВоспользуйтесь командой: /start"
-                return await Client.send_message(chat_id, text)
+                return await bot.send_message(chat_id, text)
 
     markup = types.InlineKeyboardMarkup()
     markup.row(
@@ -50,7 +50,7 @@ async def filter_words(call):
         "Выберите действие"
     )
 
-    await Client.send_message(chat_id, text, reply_markup=markup)
+    await bot.send_message(chat_id, text, reply_markup=markup)
 
 
 async def add_filter_words(call):
@@ -78,8 +78,8 @@ async def add_filter_words(call):
             "Текущие слова фильтры: " + ", ".join(user["filter_words"])
         )
 
-    await Client.send_message(chat_id, text)
-    await Client.delete_message(chat_id, message_id)
+    await bot.send_message(chat_id, text)
+    await bot.delete_message(chat_id, message_id)
 
 
 async def remove_filter_words(call):
@@ -107,11 +107,11 @@ async def remove_filter_words(call):
             "Текущие слова фильтры: " + ", ".join(user["filter_words"])
         )
 
-    await Client.send_message(chat_id, text)
-    await Client.delete_message(chat_id, message_id)
+    await bot.send_message(chat_id, text)
+    await bot.delete_message(chat_id, message_id)
 
 
-async def process_add_filter_words(message, state):
+async def process_add_filter_words(message: types.Message, state: FSMContext):
     user_id = message.from_user.id
 
     async with aiohttp.ClientSession() as session:
@@ -139,7 +139,7 @@ async def process_add_filter_words(message, state):
                 return logger.error(await response.text())
 
     await state.finish()
-    await Client.send_message(message.chat.id, text="Слова фильтры успешно изменены!")
+    await bot.send_message(message.chat.id, text="Слова фильтры успешно изменены!")
 
 
 async def process_remove_filter_words(message, state):
@@ -167,7 +167,7 @@ async def process_remove_filter_words(message, state):
                 return logger.error(await response.text())
 
     await state.finish()
-    await Client.send_message(message.chat.id, text="Слова фильтры успешно изменены!")
+    await bot.send_message(message.chat.id, text="Слова фильтры успешно изменены!")
 
 
 def setup(dp: Dispatcher):
