@@ -1,4 +1,5 @@
 import os
+from itertools import zip_longest
 
 from aiogram import Bot, Dispatcher
 from aiogram import types
