@@ -3,6 +3,7 @@ import re
 
 from aiogram import Bot, Dispatcher
 from aiogram import types
+from aiogram.utils import exceptions
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
@@ -96,7 +97,7 @@ async def process_subscribe_channel(message: types.Message, state: FSMContext):
 
     try:
         channel = await bot.get_chat(channel)
-    except ChatNotFound:
+    except exceptions.ChatNotFound:
         await state.finish()
         await bot.send_message(
             chat_id=message.chat.id, text="К сожалению, указанный канал не найден."
@@ -146,7 +147,7 @@ async def process_unsubscribe_channel(message: types.Message, state: FSMContext)
         )
     try:
         channel = await bot.get_chat(channel)
-    except ChatNotFound:
+    except exceptions.ChatNotFound:
         await state.finish()
         await bot.send_message(
             chat_id=message.chat.id, text="Указанный канал не найден"
