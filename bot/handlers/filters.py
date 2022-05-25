@@ -66,7 +66,7 @@ async def filter_click_inline(call: types.CallbackQuery, state: FSMContext):
             markup.inline_keyboard[i] = row
             break
 
-    await Client.edit_message_reply_markup(
+    await bot.edit_message_reply_markup(
         chat_id=chat_id,
         message_id=message_id,
         reply_markup=markup
@@ -84,7 +84,7 @@ async def complete_click_inline(call):
         channel = data.get("channel")
 
     if not filters:
-        return await Client.answer_callback_query(
+        return await bot.answer_callback_query(
             call.id, "Вам необходима выбрать хотя бы одну категорию!"
         )
 
@@ -104,7 +104,7 @@ async def complete_click_inline(call):
         data = {"id": user_id, "filters": filters}
         async with session.post(url=f"{URL}/api/users/", json=data) as response:
             if response.status == 201:
-                await Client.delete_message(chat_id, message_id)
+                await bot.delete_message(chat_id, message_id)
                 text = (
                     "Отлично, информационные ресурсы и фильтры заданы! "
                     "Таким образом, я буду лучше понимать Вас и отсеивать ненужную информацию. "
@@ -113,7 +113,7 @@ async def complete_click_inline(call):
                     "Если у Вас появятся какие-либо вопросы, Вы захотите поменять "
                     "информационные ресурсы или фильтры, воспользуйтесь командой /help"
                 )
-                await Client.send_message(call.from_user.id, text, reply_markup=markup)
+                await bot.send_message(call.from_user.id, text, reply_markup=markup)
                 user = await response.json()
                 await get_news(user)
             else:
@@ -138,14 +138,14 @@ async def complete_click_inline(call):
                 return logger.error(await response.text())
 
     await state.finish()
-    await Client.answer_callback_query(call.id, "Настройка завершена!")
+    await bot.answer_callback_query(call.id, "Настройка завершена!")
 
 
 async def change_filters(call):
     """Редактируем фильтры пользователя"""
     user_id = call.from_user.id
     if isinstance(call, types.CallbackQuery):
-        await Client.answer_callback_query(call.id)
+        await bot.answer_callback_query(call.id)
         chat_id = call.message.chat.id
     else:
         chat_id = call.chat.id
@@ -156,7 +156,7 @@ async def change_filters(call):
             if response.status == 200:
                 existing_filters = (await response.json())["filters"]
             elif response.status == 404:
-                return await Client.send_message(
+                return await bot.send_message(
                     chat_id=chat_id,
                     text="Вы ещё не проходили настройку! Воспользуйтесь командой /start",
                 )
@@ -190,7 +190,7 @@ async def change_filters(call):
     )
     markup.add(types.InlineKeyboardButton("Сохранить", callback_data="changefilters"))
 
-    await Client.send_message(chat_id, "Измените категории", reply_markup=markup)
+    await bot.send_message(chat_id, "Измените категории", reply_markup=markup)
 
 
 async def on_nav_filters_click_inline(call):
@@ -239,7 +239,7 @@ async def on_nav_filters_click_inline(call):
     markup.row(*nav_buttons)
     markup.add(save_btn)
 
-    await Client.edit_message_reply_markup(
+    await bot.edit_message_reply_markup(
         chat_id=chat_id, message_id=message_id, reply_markup=markup
     )
 
@@ -253,7 +253,7 @@ async def change_filters_click_inline(call):
         filters = data.get("filters", [])
 
         if not filters:
-            return await Client.answer_callback_query(
+            return await bot.answer_callback_query(
                 call.id, "Вам необходимо выбрать хотя бы одну категорию!"
             )
 
@@ -266,8 +266,8 @@ async def change_filters_click_inline(call):
             else:
                 return logger.error(await response.text())
 
-    await Client.answer_callback_query(call.id, text="Категории успешно изменены!")
-    await Client.delete_message(chat_id, message_id)
+    await bot.answer_callback_query(call.id, text="Категории успешно изменены!")
+    await bot.delete_message(chat_id, message_id)
     await state.finish()
     await get_news(user)
 
