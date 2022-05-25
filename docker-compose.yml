@@ -44,7 +44,7 @@ services:
     build:
       dockerfile: ./backend/Dockerfile
       context: ./
-    command: celery -A core beat -l info
+    command: celery -A project beat -l info
     volumes:
       - ./backend:/home/app
       - media_volume:/home/app/mediafiles
