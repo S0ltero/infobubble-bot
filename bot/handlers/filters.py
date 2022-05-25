@@ -2,6 +2,8 @@ import os
 
 from aiogram import Bot, Dispatcher
 from aiogram import types
+from aiogram.dispatcher import FSMContext
+from aiogram.dispatcher.filters.state import State, StatesGroup
 
 import aiohttp
 from loguru import logger
@@ -73,7 +75,7 @@ async def filter_click_inline(call: types.CallbackQuery, state: FSMContext):
     )
 
 
-async def complete_click_inline(call):
+async def complete_click_inline(call: types.CallbackQuery, state: FSMContext):
     """Сохраняем пользователя и его фильтры в базу данных"""
     user_id = call.from_user.id
     chat_id = call.message.chat.id
@@ -141,7 +143,7 @@ async def complete_click_inline(call):
     await bot.answer_callback_query(call.id, "Настройка завершена!")
 
 
-async def change_filters(call):
+async def change_filters(call: types.CallbackQuery, state: FSMContext):
     """Редактируем фильтры пользователя"""
     user_id = call.from_user.id
     if isinstance(call, types.CallbackQuery):
@@ -193,7 +195,7 @@ async def change_filters(call):
     await bot.send_message(chat_id, "Измените категории", reply_markup=markup)
 
 
-async def on_nav_filters_click_inline(call):
+async def on_nav_filters_click_inline(call: types.CallbackQuery, state: FSMContext):
     chat_id = call.message.chat.id
     message_id = call.message.message_id
 
@@ -244,7 +246,7 @@ async def on_nav_filters_click_inline(call):
     )
 
 
-async def change_filters_click_inline(call):
+async def change_filters_click_inline(call: types.CallbackQuery, state: FSMContext):
     user_id = call.from_user.id
     chat_id = call.message.chat.id
     message_id = call.message.message_id
