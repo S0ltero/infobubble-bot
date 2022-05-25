@@ -16,12 +16,12 @@ def clear_files():
     queryset = TelegramMessage.objects.filter(date__lte=date, has_file=True)
 
     for instance in queryset:
-        try:
-            os.remove(os.path.join(settings.MEDIA_ROOT, instance.file.name))
-        except (FileNotFoundError, IsADirectoryError):
-            pass
-        instance.file = None
+        if not os.path.exists(instance.file.path):
+            print("File not found")
+            continue
+        instance.file.delete()
         instance.has_file = False
+        instance.archived = True
         instance.save()
 
     logger.info(f"Удалено {len(queryset)} файлов")
