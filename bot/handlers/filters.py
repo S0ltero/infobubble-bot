@@ -24,7 +24,13 @@ news_filters = [
 ]
 
 
-async def filter_click_inline(call):
+# States
+
+class FiltersForm(StatesGroup):
+    filters = State()
+
+
+async def filter_click_inline(call: types.CallbackQuery, state: FSMContext):
     """Собираем фильтры пользователя"""
     choosen_filter = call.data
     chat_id = call.message.chat.id

@@ -58,10 +58,6 @@ class StartForm(StatesGroup):
     filters = State()
 
 
-class FiltersForm(StatesGroup):
-    filters = State()
-
-
 @dp.message_handler(commands=["start"])
 async def start(message):
     """Инициируем добавление нового пользователя"""
