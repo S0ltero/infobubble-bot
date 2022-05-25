@@ -36,7 +36,7 @@ async def get_channel(text: str):
         return None
 
 
-async def subscribes(call):
+async def subscribes(call: types.CallbackQuery):
     user_id = call.from_user.id
     if isinstance(call, types.CallbackQuery):
         await bot.answer_callback_query(call.id)
@@ -64,7 +64,7 @@ async def subscribes(call):
     )
 
 
-async def subscribe_click_inline(call):
+async def subscribe_click_inline(call: types.CallbackQuery):
     # Set state
     await SubscribeForm.channel.set()
 
@@ -74,7 +74,7 @@ async def subscribe_click_inline(call):
     await bot.send_message(call.message.chat.id, text)
 
 
-async def unsubscribe_click_inline(call):
+async def unsubscribe_click_inline(call: types.CallbackQuery):
     # Set state
     await UnsubscribeForm.channel.set()
 
@@ -84,7 +84,7 @@ async def unsubscribe_click_inline(call):
     await bot.send_message(call.message.chat.id, text)
 
 
-async def process_subscribe_channel(message, state):
+async def process_subscribe_channel(message: types.Message, state: FSMContext):
     user_id = message.from_user.id
     channel = await get_channel(message.text)
     if not channel:
@@ -135,7 +135,7 @@ async def process_subscribe_channel(message, state):
     await state.finish()
 
 
-async def process_unsubscribe_channel(message, state):
+async def process_unsubscribe_channel(message: types.Message, state: FSMContext):
     user_id = message.from_user.id
     channel = await get_channel(message.text)
     if not channel:
