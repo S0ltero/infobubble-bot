@@ -9,6 +9,7 @@ import aiohttp
 from loguru import logger
 
 API_TOKEN = os.getenv("TELEGRAM_TOKEN")
+URL = os.getenv("DJANGO_HOST")
 
 bot = Bot(token=API_TOKEN)
 
