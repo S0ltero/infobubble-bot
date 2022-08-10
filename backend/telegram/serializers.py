@@ -52,6 +52,7 @@ class TelegramMediaSerializer(serializers.ModelSerializer):
 
 
 class TelegramMessageSerializer(serializers.ModelSerializer):
+    media = TelegramMediaSerializer(many=True, read_only=False, required=False)
 
     class Meta:
         model = TelegramMessage
