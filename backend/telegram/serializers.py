@@ -59,6 +59,26 @@ class TelegramMessageSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+    def create(self, validated_data):
+        media = validated_data.pop("media", None)
+        message = super().create(validated_data)
+
+        bulk_insert_media = []
+
+        if media:
+            for file in media:
+                bulk_insert_media.append(
+                    TelegramMedia(
+                        message=message,
+                        file_id=file["file_id"],
+                        file_type=file["file_type"]
+                    )
+                )
+
+        TelegramMedia.objects.bulk_create(bulk_insert_media)
+        return message
+
+
 class HistoryMessageSerializer(serializers.ModelSerializer):
 
     class Meta:
