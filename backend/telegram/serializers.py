@@ -7,6 +7,7 @@ from .models import (
     TelegramUser,
     TelegramChannel,
     TelegramMessage,
+    TelegramMedia,
     HistoryMessage,
     UserMessageRate,
     UserSubscribe,
@@ -40,6 +41,14 @@ class TelegramChannelSerializer(serializers.ModelSerializer):
 
     def get_subscribes(self, obj):
         return obj.subscribes.values_list("user_id", flat=True)
+
+
+class TelegramMediaSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = TelegramMedia
+        fields = "__all__"
+        extra_kwargs = {"message": {"required": False}}
 
 
 class TelegramMessageSerializer(serializers.ModelSerializer):
