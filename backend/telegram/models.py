@@ -52,7 +52,7 @@ class TelegramChannel(models.Model):
 class TelegramMessage(models.Model):
     message_id = models.CharField(verbose_name="ID сообщения", max_length=130)
     channel = models.ForeignKey(TelegramChannel, verbose_name="Канал сообщения", to_field="channel_id", on_delete=models.CASCADE)
-    text = models.TextField(verbose_name="Текст сообщения", max_length=4096)
+    text = models.TextField(verbose_name="Текст сообщения", max_length=4096, blank=True)
     date = models.DateField(verbose_name="Дата создания", auto_now_add=True)
     file = models.FileField(verbose_name="Файл", blank=True, null=True)
     file_type = models.CharField(verbose_name="Тип файла", max_length=100, blank=True)
