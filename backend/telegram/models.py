@@ -74,6 +74,29 @@ class TelegramMessage(models.Model):
         super(TelegramMessage, self).save(*args, **kwargs)
 
 
+class TelegramMedia(models.Model):
+    class Type(models.TextChoices):
+        AUDIO = "AUDIO"
+        DOCUMENT = "DOCUMENT"
+        PHOTO = "PHOTO"
+        STICKER = "STICKER"
+        VIDEO = "VIDEO"
+        ANIMATION = "ANIMATION"
+        VOICE = "VOICE"
+        VIDEO_NOTE = "VIDEO_NOTE"
+        CONTACT = "CONTACT"
+        LOCATION = "LOCATION"
+        WEB_PAGE = "WEB_PAGE"
+
+    message = models.ForeignKey(TelegramMessage, related_name="media", on_delete=models.CASCADE)
+    file_id = models.CharField(max_length=255)
+    file_type = models.CharField(max_length=20, choices=Type.choices)
+
+    class Meta:
+        verbose_name = "Медиа файл"
+        verbose_name_plural = "Медиа файлы"
+
+
 class HistoryMessage(models.Model):
     message = models.ForeignKey(TelegramMessage, related_name="history", on_delete=models.PROTECT)
     user = models.ForeignKey(TelegramUser, related_name="history", on_delete=models.CASCADE)
