@@ -1,5 +1,9 @@
 from django.contrib import admin
-from .models import TelegramUser, TelegramChannel, TelegramMessage, UserMessageRate, UserSubscribe, HistoryMessage, Config
+from .models import (
+    TelegramUser, TelegramChannel,
+    TelegramMessage, TelegramMedia,
+    UserMessageRate, UserSubscribe,
+    HistoryMessage, Config)
 
 from import_export import resources
 from import_export.admin import ImportExportActionModelAdmin
@@ -10,6 +14,7 @@ admin.site.register(UserSubscribe)
 admin.site.register(HistoryMessage)
 admin.site.register(Config)
 admin.site.register(TelegramMessage)
+admin.site.register(TelegramMedia)
 
 class TelegramChannelResource(resources.ModelResource):
 
