@@ -22,6 +22,13 @@ class UserViewset(viewsets.GenericViewSet):
     queryset = TelegramUser
     serializer_class =TelegramUserSerializer
 
+    def get_queryset(self):
+        qs = super().get_queryset()
+
+        tags = self.request.query_params.get("tags")
+        if tags:
+            qs = qs.filter(filters__overlap=tags)
+
     def retrieve(self, request, pk=None):
         try:
             user = self.queryset.objects.get(id=pk)
