@@ -90,7 +90,7 @@ class UserViewset(viewsets.GenericViewSet):
 
 
 class ChannelViewset(viewsets.GenericViewSet):
-    queryset = TelegramChannel
+    queryset = TelegramChannel.objects.all()
     serializer_class = TelegramChannelSerializer
 
     def get_queryset(self):
@@ -103,11 +103,7 @@ class ChannelViewset(viewsets.GenericViewSet):
         return qs
 
     def retrieve(self, request, pk=None):
-        try:
-            channel = self.queryset.objects.get(channel_id=pk)
-        except TelegramChannel.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
+        channel = self.get_object()
         serializer = self.serializer_class(channel)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -120,14 +116,8 @@ class ChannelViewset(viewsets.GenericViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def partial_update(self, request, pk=None):
-        data = request.data
-
-        try:
-            channel = self.queryset.objects.get(channel_url=pk)
-        except TelegramChannel.DoesNotExist:
-            return Response(f'Канал с url: {pk} не найден', status=status.HTTP_404_NOT_FOUND)
-
-        serializer = self.serializer_class(channel, data=data, partial=True)
+        channel = self.get_object()
+        serializer = self.serializer_class(channel, data=request.data, partial=True)
         if serializer.is_valid(raise_exception=False):
             serializer.update(channel, serializer.validated_data)
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -135,19 +125,11 @@ class ChannelViewset(viewsets.GenericViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def list(self, request, *args, **kwargs):
-        tags = self.request.query_params.get("tags")
-
-        try:
-            if tags:
-                tags = tags.split(",")
-                channels = self.queryset.objects.filter(tags__overlap=tags)
-            else:
-                channels = self.queryset.objects.all()
-        except TelegramChannel.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
+        channels = self.get_queryset()
         channels = channels.values_list("channel_url", "channel_id")
         return Response(channels, status=status.HTTP_200_OK)
+
+
 
     @action(detail=True)
     def subscribes(self, request, pk=None):
