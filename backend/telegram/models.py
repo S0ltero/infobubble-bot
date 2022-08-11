@@ -63,6 +63,9 @@ class TelegramMessage(models.Model):
         verbose_name = "Сообщение"
         verbose_name_plural = "Сообщения"
         unique_together = ("message_id", "channel_id")
+        indexes = (
+            models.Index(fields=["message_id", "channel"]),
+        )
 
     def clean(self):
         if self.file and len(self.text) > 1024:
