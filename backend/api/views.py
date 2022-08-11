@@ -1,4 +1,5 @@
 from django.db.utils import IntegrityError
+from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
@@ -173,23 +174,18 @@ class MessageViewset(viewsets.GenericViewSet):
 
 
 class HistoryViewset(viewsets.GenericViewSet):
-    queryset = HistoryMessage
+    queryset = HistoryMessage.objects.all()
     serializer_class = HistoryMessageSerializer
 
     @action(methods=["get"], detail=False, url_path=r"(?P<user_id>[\w-]+)/(?P<channel_id>[\w-]+)/(?P<message_id>[\w-]+)", url_name="list")
     def get_message(self, request, user_id, channel_id, message_id):
-        try:
-            history_message = self.queryset.objects.get(user_id=user_id, channel_id=channel_id, message_id=message_id)
-        except HistoryMessage.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
+        qs = self.get_queryset()
+        history_message = get_object_or_404(qs, user_id=user_id, channel_id=channel_id, message_id=message_id)
         serializer = self.serializer_class(history_message)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def create(self, request):
-        data = request.data
-
-        serializer = self.serializer_class(data=data)
+        serializer = self.serializer_class(data=request.data)
         if serializer.is_valid(raise_exception=False):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -201,9 +197,7 @@ class UserRateView(APIView):
     serializer_class = UserMessageRateSerializer
 
     def post(self, request):
-        data = request.data
-
-        serializer = self.serializer_class(data=data)
+        serializer = self.serializer_class(data=request.data)
         if serializer.is_valid(raise_exception=False):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -225,9 +219,7 @@ class UserSubscribeView(APIView):
         return Response(serialzer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
-        data = request.data
-
-        serializer = self.serializer_class(data=data)
+        serializer = self.serializer_class(data=request.data)
         if serializer.is_valid(raise_exception=False):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
