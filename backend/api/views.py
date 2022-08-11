@@ -143,15 +143,11 @@ class ChannelViewset(viewsets.GenericViewSet):
 
 
 class MessageViewset(viewsets.GenericViewSet):
-    queryset = TelegramMessage
+    queryset = TelegramMessage.objects.all()
     serializer_class = TelegramMessageSerializer
 
     def retrieve(self, request, pk=None):
-        try:
-            message = self.queryset.objects.get(id=pk)
-        except TelegramChannel.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
+        message = self.get_queryset()
         serializer = self.serializer_class(message)
         return Response(serializer.data["subscribes"], status=status.HTTP_200_OK)
 
