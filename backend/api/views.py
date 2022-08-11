@@ -5,7 +5,6 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.decorators import action
 from rest_framework import viewsets
-from rest_framework.generics import ListAPIView
 
 from telegram.models import TelegramChannel, TelegramMessage, TelegramUser, HistoryMessage, UserSubscribe, Config
 from telegram.serializers import (
