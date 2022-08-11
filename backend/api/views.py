@@ -122,6 +122,15 @@ class ChannelViewset(viewsets.GenericViewSet):
     queryset = TelegramChannel
     serializer_class = TelegramChannelSerializer
 
+    def get_queryset(self):
+        qs = super().get_queryset()
+
+        tags = self.request.query_params.get("tags")
+        if tags:
+            qs = qs.objects.filter(tags__overlap=tags)
+
+        return qs
+
     def retrieve(self, request, pk=None):
         try:
             channel = self.queryset.objects.get(channel_id=pk)
