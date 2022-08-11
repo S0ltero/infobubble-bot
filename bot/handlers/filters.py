@@ -292,17 +292,21 @@ def setup(dp: Dispatcher):
     )
     dp.register_callback_query_handler(
         filter_click_inline,
-        lambda call: call.data in news_filters
+        lambda call: call.data in news_filters,
+        state="*"
     )
     dp.register_callback_query_handler(
         complete_click_inline,
-        lambda call: call.data == "complete"
+        lambda call: call.data == "complete",
+        state="*"
     )
     dp.register_callback_query_handler(
         on_nav_filters_click_inline,
-        lambda call: call.data in ("previous_filters", "next_filters")
+        lambda call: call.data in ("previous_filters", "next_filters"),
+        state="*"
     )
     dp.register_callback_query_handler(
         change_filters_click_inline,
-        lambda call: call.data == "changefilters"
+        lambda call: call.data == "changefilters",
+        state="*"
     )
