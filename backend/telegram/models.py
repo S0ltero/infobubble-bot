@@ -57,6 +57,7 @@ class TelegramMessage(models.Model):
     file = models.FileField(verbose_name="Файл", blank=True, null=True)
     file_type = models.CharField(verbose_name="Тип файла", max_length=100, blank=True)
     has_file = models.BooleanField(verbose_name="Есть файл?", default=False)
+    media_group_id = models.CharField(max_length=255, blank=True, null=True, unique=True)
 
     class Meta:
         verbose_name = "Сообщение"
