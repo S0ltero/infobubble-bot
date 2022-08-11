@@ -93,6 +93,7 @@ class TelegramMedia(models.Model):
         WEB_PAGE = "WEB_PAGE"
 
     message = models.ForeignKey(TelegramMessage, related_name="media", on_delete=models.CASCADE)
+    media_group_id = models.CharField(max_length=255, blank=True, null=True)
     file_id = models.CharField(max_length=255)
     file_type = models.CharField(max_length=20, choices=Type.choices)
 
