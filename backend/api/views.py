@@ -19,7 +19,7 @@ from telegram.serializers import (
 
 
 class UserViewset(viewsets.GenericViewSet):
-    queryset = TelegramUser
+    queryset = TelegramUser.objects.all()
     serializer_class =TelegramUserSerializer
 
     def get_queryset(self):
@@ -30,18 +30,12 @@ class UserViewset(viewsets.GenericViewSet):
             qs = qs.filter(filters__overlap=tags)
 
     def retrieve(self, request, pk=None):
-        try:
-            user = self.queryset.objects.get(id=pk)
-        except TelegramUser.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
+        user = self.get_object()
         serializer = self.serializer_class(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def create(self, request):
-        data = request.data
-
-        serializer = self.serializer_class(data=data)
+        serializer = self.serializer_class(data=request.data)
         if serializer.is_valid(raise_exception=False):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -49,14 +43,8 @@ class UserViewset(viewsets.GenericViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def partial_update(self, request, pk=None):
-        data = request.data
-
-        try:
-            user = TelegramUser.objects.get(id=pk)
-        except TelegramUser.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        serializer = self.serializer_class(instance=user, data=data, partial=True)
+        user = self.get_object()
+        serializer = self.serializer_class(instance=user, data=request.data, partial=True)
         if serializer.is_valid(raise_exception=False):
             serializer.update(user, serializer.validated_data)
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -64,35 +52,18 @@ class UserViewset(viewsets.GenericViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def list(self, request):
-        try:
-            tags = self.request.query_params.get("tags")
-            if tags:
-                tags = tags.split(",")
-                users = self.queryset.objects.filter(filters__overlap=tags)
-            else:
-                users = self.queryset.objects.all()
-        except TelegramUser.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
+        users = self.get_queryset()
         serializer = self.serializer_class(users, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def destroy(self, request, pk=None):
-        try:
-            user = self.queryset.objects.get(id=pk)
-        except TelegramUser.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
+        user = self.get_object()
         user.delete()
         return Response(status=status.HTTP_200_OK)
 
     @action(detail=True)
     def news(self, request, pk=None):
-        try:
-            user = self.queryset.objects.get(pk=pk)
-        except TelegramUser.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
+        user = self.get_object()
         news = TelegramMessage.objects.filter(channel__tags__overlap=user.filters)
         news = news.exclude(history__user_id=user.id)
         for word in user.filter_words:
