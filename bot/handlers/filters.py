@@ -263,6 +263,10 @@ async def change_filters_click_inline(call: types.CallbackQuery, state: FSMConte
                 call.id, "Вам необходимо выбрать хотя бы одну категорию!"
             )
 
+        if data.get("help_message"):
+            help_message: types.Message = data["help_message"]
+            await help_message.delete()
+
     data = {"id": user_id, "filters": filters}
 
     async with aiohttp.ClientSession() as session:
