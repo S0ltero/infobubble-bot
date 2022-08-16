@@ -52,7 +52,7 @@ async def filter_words(call: types.CallbackQuery):
     await bot.send_message(chat_id, text, reply_markup=markup)
 
 
-async def add_filter_words(call: types.CallbackQuery):
+async def add_filter_words(call: types.CallbackQuery, state: FSMContext):
     user_id = call.from_user.id
     chat_id = call.message.chat.id
     message_id = call.message.message_id
@@ -81,7 +81,7 @@ async def add_filter_words(call: types.CallbackQuery):
     await bot.delete_message(chat_id, message_id)
 
 
-async def remove_filter_words(call: types.CallbackQuery):
+async def remove_filter_words(call: types.CallbackQuery, state: FSMContext):
     user_id = call.from_user.id
     chat_id = call.message.chat.id
     message_id = call.message.message_id
@@ -191,9 +191,11 @@ def setup(dp: Dispatcher):
     )
     dp.register_callback_query_handler(
         add_filter_words,
-        lambda call: call.data == "add_filter_words"
+        lambda call: call.data == "add_filter_words",
+        state="*"
     )
     dp.register_callback_query_handler(
         remove_filter_words,
-        lambda call: call.data == "remove_filter_words"
+        lambda call: call.data == "remove_filter_words",
+        state="*"
     )
