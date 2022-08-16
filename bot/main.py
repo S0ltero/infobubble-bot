@@ -311,7 +311,11 @@ async def complete_click_inline(call: types.CallbackQuery, state: FSMContext):
 @dp.callback_query_handler(lambda call: call.data.startswith("like"))
 async def on_like(call: types.CallbackQuery):
     user_id = call.from_user.id
-    message_id = call.message.message_id
+
+    if call.message.reply_to_message:
+        message_id = call.message.reply_to_message.message_id
+    else:
+        message_id = call.message.message_id
     channel_id = call.data.split("_")[1]
     data = {
         "user_id": user_id,
@@ -320,6 +324,11 @@ async def on_like(call: types.CallbackQuery):
         "rate": True,
     }
 
+    markup = types.InlineKeyboardMarkup()
+    markup.add(
+        types.InlineKeyboardButton("Далее", callback_data="next")
+    )
+
     async with aiohttp.ClientSession() as session:
         async with session.post(url=f"{URL}/api/rate/", json=data) as response:
             if response.status != 201:
@@ -330,6 +339,7 @@ async def on_like(call: types.CallbackQuery):
             else:
                 return logger.error(await response.text())
 
+    await call.message.edit_reply_markup(markup)
     await bot.answer_callback_query(call.id)
     await get_news(user)
 
@@ -337,7 +347,11 @@ async def on_like(call: types.CallbackQuery):
 @dp.callback_query_handler(lambda call: call.data.startswith("nolike"))
 async def on_nolike(call: types.CallbackQuery):
     user_id = call.from_user.id
-    message_id = call.message.message_id
+
+    if call.message.reply_to_message:
+        message_id = call.message.reply_to_message.message_id
+    else:
+        message_id = call.message.message_id
     channel_id = call.data.split("_")[1]
     data = {
         "user_id": user_id,
@@ -346,6 +360,11 @@ async def on_nolike(call: types.CallbackQuery):
         "rate": False,
     }
 
+    markup = types.InlineKeyboardMarkup()
+    markup.add(
+        types.InlineKeyboardButton("Далее", callback_data="next")
+    )
+
     async with aiohttp.ClientSession() as session:
         async with session.post(url=f"{URL}/api/rate/", json=data) as response:
             if response.status != 201:
@@ -356,6 +375,7 @@ async def on_nolike(call: types.CallbackQuery):
             else:
                 return logger.error(await response.text())
 
+    await call.message.edit_reply_markup(markup)
     await bot.answer_callback_query(call.id)
     await get_news(user)
 
