@@ -133,21 +133,19 @@ async def process_add_filter_words(message: types.Message, state: FSMContext):
                 await state.finish()
                 return logger.error(await response.text())
 
-    add_words = list(map(lambda x: x.strip(), message.text.lower().split(",")))
+    add_words = set(map(lambda x: x.strip(), message.text.lower().split(",")))
     if user.get("filter_words"):
-        words = list(set(add_words).update(user["filter_words"]))
-    else:
-        words = list(set(add_words))
+        add_words = add_words.update(user["filter_words"])
 
-    data = {"id": user_id, "filter_words": words}
-
-    async with aiohttp.ClientSession() as session:
-        async with session.patch(url=f"{URL}/api/users/{user_id}/", json=data) as response:
-            if response.status == 200:
-                user = await response.json()
-            else:
-                await state.finish()
-                return logger.error(await response.text())
+    if add_words:
+        async with aiohttp.ClientSession() as session:
+            data = {"id": user_id, "filter_words": add_words}
+            async with session.patch(url=f"{URL}/api/users/{user_id}/", json=data) as response:
+                if response.status == 200:
+                    user = await response.json()
+                else:
+                    await state.finish()
+                    return logger.error(await response.text())
 
     await state.finish()
     await bot.send_message(message.chat.id, text="Слова фильтры успешно изменены!")
