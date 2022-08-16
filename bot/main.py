@@ -239,50 +239,6 @@ async def menu(message: types.Message):
     await bot.send_message(message.chat.id, text, reply_markup=markup)
 
 
-@dp.callback_query_handler(lambda call: call.data in news_filters, state="*")
-async def filter_click_inline(call, state: FSMContext):
-    """Собираем фильтры пользователя"""
-    choosen_filter = call.data
-    chat_id = call.message.chat.id
-    message_id = call.message.message_id
-
-    async with state.proxy() as data:
-        filters = data.get("filters", [])
-
-        if choosen_filter in filters:
-            filters.remove(choosen_filter)
-            event_type = "remove"
-        else:
-            filters.append(choosen_filter)
-            event_type = "append"
-
-        data["filters"] = filters
-
-    markup = call.message.reply_markup
-    for i, row in enumerate(markup.inline_keyboard):
-        try:
-            filter_button = next(
-                btn for btn in row if btn.callback_data == choosen_filter
-            )
-            btn_index = row.index(filter_button)
-        except StopIteration:
-            continue
-        else:
-            if event_type == "append":
-                filter_button.text = f"{choosen_filter} ✅"
-            elif event_type == "remove":
-                filter_button.text = choosen_filter
-            row[btn_index] = filter_button
-            markup.inline_keyboard[i] = row
-            break
-
-    await bot.edit_message_reply_markup(
-        chat_id=chat_id,
-        message_id=message_id,
-        reply_markup=markup
-    )
-
-
 @dp.callback_query_handler(lambda call: call.data == "complete", state="*")
 async def complete_click_inline(call: types.CallbackQuery, state: FSMContext):
     """Сохраняем пользователя и его фильтры в базу данных"""
