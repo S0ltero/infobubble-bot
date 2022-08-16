@@ -194,6 +194,7 @@ async def change_filters(call: types.CallbackQuery, state: FSMContext):
         types.InlineKeyboardButton("Далее", callback_data="next_filters"),
     )
     markup.add(types.InlineKeyboardButton("Сохранить", callback_data="changefilters"))
+    markup.add(types.InlineKeyboardButton("Помощь", callback_data="help"))
 
     await bot.send_message(chat_id, "Измените категории", reply_markup=markup)
 
