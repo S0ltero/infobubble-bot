@@ -79,7 +79,8 @@ class UserViewset(viewsets.GenericViewSet):
     @action(detail=True, url_name="news-subscribe", url_path="news-subscribe")
     def news_subscribe(self, request, pk=None):
         try:
-            user = self.queryset.objects.prefetch_related("subscribes").get(id=pk)
+            qs = self.get_queryset()
+            user = qs.prefetch_related("subscribes").get(id=pk)
         except TelegramUser.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
