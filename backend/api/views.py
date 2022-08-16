@@ -194,6 +194,24 @@ class MessageViewset(viewsets.GenericViewSet):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @action(
+        detail=False,
+        methods=["post"],
+        url_name="media-group",
+        url_path=r"media/(?P<media_group_id>[\w-]+)",
+        serializer_class=TelegramMediaSerializer
+    )
+    def media_group(self, request, media_group_id):
+        """Add group of media files ids to `TelegramMessage` by `channel_id` and `media_group_id`"""
+        qs = self.get_queryset()
+        message = get_object_or_404(qs, media_group_id=media_group_id)
+        serializer = self.serializer_class(data=request.data, many=True)
+        if serializer.is_valid(raise_exception=False):
+            serializer.save(message_id=message.id)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class HistoryViewset(viewsets.GenericViewSet):
     queryset = HistoryMessage.objects.all()
