@@ -19,6 +19,28 @@ user_subscribe_news = {}
 user_news = {}
 
 
+async def create_media_list(media_items: list):
+    """Convert list of dicts from DB to aiogram input media types list"""
+    media_list = []
+
+    for item in media_items:
+        file_id = item["file_id"]
+        file_type = item["file_type"]
+
+        if file_type == "PHOTO":
+            media_list.append(types.InputMediaPhoto(media=file_id))
+        elif file_type in ["VIDEO", "VIDEO_NOTE"]:
+            media_list.append(types.InputMediaVideo(media=file_id))
+        elif file_type == "ANIMATION":
+            media_list.append(types.InputMediaAnimation(media=file_id))
+        elif file_type == "DOCUMENT":
+            media_list.append(types.InputMediaDocument(media=file_id))
+        elif file_type == "VOICE":
+            media_list.append(types.InputMediaAudio(media=file_id))
+
+    return media_list
+
+
 async def send_new(user, message):
     user_id = user["id"]
     channel_id = message["channel"]
