@@ -56,9 +56,6 @@ class TelegramMessage(models.Model):
     channel = models.ForeignKey(TelegramChannel, verbose_name="Канал сообщения", to_field="channel_id", on_delete=models.CASCADE)
     text = models.TextField(verbose_name="Текст сообщения", max_length=4096, blank=True)
     date = models.DateField(verbose_name="Дата создания", auto_now_add=True)
-    file = models.FileField(verbose_name="Файл", blank=True, null=True)
-    file_type = models.CharField(verbose_name="Тип файла", max_length=100, blank=True)
-    has_file = models.BooleanField(verbose_name="Есть файл?", default=False)
     media_group_id = models.CharField(max_length=255, blank=True, null=True, unique=True)
 
     class Meta:
@@ -68,16 +65,6 @@ class TelegramMessage(models.Model):
         indexes = (
             models.Index(fields=["message_id", "channel"]),
         )
-
-    def clean(self):
-        if self.file and len(self.text) > 1024:
-            raise ValidationError("Превышено допустимое количество символов (1024) для сообщения с файлом!")
-
-    def save(self, *args, **kwargs):
-        if self.file:
-            self.has_file = True
-
-        super(TelegramMessage, self).save(*args, **kwargs)
 
 
 class TelegramMedia(models.Model):
