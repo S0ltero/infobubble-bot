@@ -29,6 +29,8 @@ class UserViewset(viewsets.GenericViewSet):
         if tags:
             qs = qs.filter(filters__overlap=tags)
 
+        return qs
+
     def retrieve(self, request, pk=None):
         user = self.get_object()
         serializer = self.serializer_class(user)
