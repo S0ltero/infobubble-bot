@@ -59,6 +59,60 @@ class StartForm(StatesGroup):
     filters = State()
 
 
+@dp.channel_post_handler(
+    lambda message: message.chat.id == int(SHARED_CHANNEL_ID),
+    content_types=types.ContentType.all()
+)
+async def shared_message_handler(message: types.Message):
+    """
+        Handler for forwarded messages from `grabber` service in `Shared Channel`
+
+        Get `file_id` from media of forwarded messages, and send to `backend` service
+    """
+    if not message.is_forward():
+        return
+
+    forward_from_chat_id = message.forward_from_chat.id
+    forward_from_message_id = message.forward_from_message_id
+
+    media = []
+    media_group_id = message.media_group_id
+
+    async def _parse_media(media_type: str, item):
+        """Iterate by media items of message and format data for sending by API"""
+        media.append(
+            {
+                "file_id": item.file_id,
+                "file_type": media_type,
+                "media_group_id": media_group_id
+            }
+        )
+
+    if message.photo:
+        await _parse_media(media_type="PHOTO", item=message.photo[0])
+    elif message.video:
+        await _parse_media(media_type="VIDEO", item=message.video)
+    elif message.video_note:
+        await _parse_media(media_type="VIDEO_NOTE", item=message.video_note)
+    elif message.document:
+        await _parse_media(media_type="DOCUMENT", item=message.document)
+    elif message.voice:
+        await _parse_media(media_type="VOICE", item=message.voice)
+
+    if media_group_id:
+        api_url = f"{URL}/api/messages/media/{media_group_id}/"
+    else:
+        api_url = f"{URL}/api/messages/{forward_from_chat_id}/{forward_from_message_id}/media/"
+
+    async with aiohttp.ClientSession() as session:
+        status = None
+        while status != 201:
+            async with session.post(url=api_url, json=media) as response:
+                status = response.status
+                if status == 400:
+                    return logger.error(await response.json())
+
+
 @dp.message_handler(commands=["start"])
 async def start(message: types.Message):
     """Инициируем добавление нового пользователя"""
