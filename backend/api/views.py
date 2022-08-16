@@ -131,6 +131,11 @@ class ChannelViewset(viewsets.GenericViewSet):
         channels = channels.values_list("channel_url", "channel_id")
         return Response(channels, status=status.HTTP_200_OK)
 
+    @action(detail=False, url_name="ids", url_path="ids")
+    def ids(self, request):
+        qs = self.get_queryset()
+        channel_ids = qs.values_list("channel_id", flat=True)
+        return Response(channel_ids, status=status.HTTP_200_OK)
 
 
     @action(detail=True)
