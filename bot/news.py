@@ -1,11 +1,9 @@
 import os
 import asyncio
-from pathlib import Path
 from datetime import datetime
 
 from aiogram import Bot
-from aiogram import types
-from aiogram.utils import exceptions
+from aiogram import types, exceptions
 
 import aiohttp
 from loguru import logger
@@ -47,54 +45,71 @@ async def send_new(user, message):
 
     # Добавляем inline кнопки
     markup = types.InlineKeyboardMarkup(row_width=2)
-    markup.add(types.InlineKeyboardButton("❤️", callback_data=f"like_{channel_id}"))
-    markup.add(types.InlineKeyboardButton("👎", callback_data=f"nolike_{channel_id}"))
-    markup.add(types.InlineKeyboardButton("Далее", callback_data="next"))
-
-    if message["file"]:
-        has_file = True
-        filename = message["file"].split("/")[2]
-        file_path = Path().cwd() / "media" / filename
-    else:
-        has_file = False
+    markup.row(
+        types.InlineKeyboardButton("❤️", callback_data=f"like_{channel_id}"),
+        types.InlineKeyboardButton("👎", callback_data=f"nolike_{channel_id}")
+    )
+    markup.row(types.InlineKeyboardButton("Далее", callback_data="next"))
 
     try:
-        if not has_file:
-            await bot.send_message(
-                user_id,
-                message["text"],
-                reply_markup=markup,
-                parse_mode=types.ParseMode.HTML
-            )
-        elif message["file_type"] == "video":
-            await bot.send_video(
-                user_id,
-                file_path.open("rb"),
-                caption=message["text"],
-                reply_markup=markup,
-                parse_mode=types.ParseMode.HTML
-            )
-        elif message["file_type"] == "photo":
-            await bot.send_photo(
-                user_id,
-                file_path.open("rb"),
-                caption=message["text"],
-                reply_markup=markup,
-                parse_mode=types.ParseMode.HTML
-            )
+        data = {
+            "chat_id": user_id,
+            "reply_markup": markup,
+            "parse_mode": types.ParseMode.HTML
+        }
+        if message.get("media"):
+            if len(message["media"]) > 1:
+                media_list = await create_media_list(message["media"])
+                media_list[0].caption = message["text"]
+                media_list[0].parse_mode = types.ParseMode.HTML
+                media_list[0].reply_markup = markup
+
+                media_message = await bot.send_media_group(
+                    chat_id=user_id,
+                    media=media_list,
+                )
+                await bot.send_message(
+                    **data,
+                    text="Оцените новость",
+                    reply_to_message_id=media_message[0].message_id,
+                )
+            else:
+                data["caption"] = message["text"]
+                media = message["media"][0]
+                if media["file_type"] == "PHOTO":
+                    data["photo"] = media["file_id"]
+                    await bot.send_photo(**data)
+                elif media["file_type"] in ["VIDEO", "VIDEO_NOTE"]:
+                    data["video"] = media["file_id"]
+                    await bot.send_video(**data)
+                elif media["file_type"] == "ANIMATION":
+                    data["animation"] = media["file_id"]
+                    await bot.send_animation(**data)
+                elif media["file_type"] == "DOCUMENT":
+                    data["document"] = media["file_id"]
+                    await bot.send_document(**data)
+                elif media["file_type"] == "AUDIO":
+                    data["audio"] = media["file_id"]
+                    await bot.send_audio(**data)
+        else:
+            data["text"] = message["text"]
+            await bot.send_message(**data)
     except (
-        FileNotFoundError,
         exceptions.BotBlocked,
+        exceptions.RetryAfter,
+        exceptions.BadRequest,
         exceptions.UserDeactivated,
         exceptions.CantParseEntities
     ) as e:
         async with aiohttp.ClientSession() as session:
-            if isinstance(e, (FileNotFoundError, exceptions.CantParseEntities)):
-                async with session.delete(url=f"{URL}/api/messages/{message['id']}") as response:
-                    pass
             if isinstance(e, exceptions.UserDeactivated):
                 async with session.delete(url=f"{URL}/api/users/{user_id}") as response:
                     pass
+        if isinstance(e, exceptions.RetryAfter):
+            await asyncio.sleep(e.value)
+            await get_news(user)
+            return logger.error(e)
+
         await get_news(user)
         return logger.error(e)
 
