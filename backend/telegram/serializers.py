@@ -95,6 +95,12 @@ class UserMessageRateSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserMessageRate
         fields = "__all__"
+        validators = (
+            validators.UniqueTogetherValidator(
+                queryset=UserMessageRate.objects.all(),
+                fields=("message_id", "channel_id", "user_id")
+            ),
+        )
 
 
 class UserSubscribeSerializer(serializers.ModelSerializer):
