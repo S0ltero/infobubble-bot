@@ -14,12 +14,9 @@ URL = os.getenv("DJANGO_HOST")
 bot = Bot(token=API_TOKEN)
 
 # States
-class AddFilterWords(StatesGroup):
-    words = State()
-
-
-class RemoveFilterWords(StatesGroup):
-    words = State()
+class FilterWordsForm(StatesGroup):
+    add_words = State()
+    remove_words = State()
 
 
 async def filter_words(call: types.CallbackQuery):
@@ -67,7 +64,7 @@ async def add_filter_words(call: types.CallbackQuery):
             else:
                 return logger.error(await response.text())
 
-    await AddFilterWords.words.set()
+    await FilterWordsForm.add_words.set()
 
     if not user.get("filter_words"):
         text = (
@@ -96,7 +93,7 @@ async def remove_filter_words(call: types.CallbackQuery):
             else:
                 return logger.error(await response.text())
 
-    await RemoveFilterWords.words.set()
+    await FilterWordsForm.remove_words.set()
 
     if not user.get("filter_words"):
         text = (
@@ -180,11 +177,11 @@ def setup(dp: Dispatcher):
     )
     dp.register_message_handler(
         process_add_filter_words,
-        state=AddFilterWords.words
+        state=FilterWordsForm.add_words
     )
     dp.register_message_handler(
         process_remove_filter_words,
-        state=RemoveFilterWords.words
+        state=FilterWordsForm.remove_words
     )
 
     # Query handlers
