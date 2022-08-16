@@ -17,11 +17,8 @@ bot = Bot(token=API_TOKEN)
 
 # States
 class SubscribeForm(StatesGroup):
-    channel = State()
-
-
-class UnsubscribeForm(StatesGroup):
-    channel = State()
+    add_channel = State()
+    remove_channel = State()
 
 
 async def get_channel(text: str):
@@ -67,7 +64,7 @@ async def subscribes(call: types.CallbackQuery):
 
 async def subscribe_click_inline(call: types.CallbackQuery):
     # Set state
-    await SubscribeForm.channel.set()
+    await SubscribeForm.add_channel.set()
 
     text = "Чтобы добавить канал, отправьте @упоминание или ссылку на канал, с которого (Вы) хотите получать новости."
 
@@ -77,7 +74,7 @@ async def subscribe_click_inline(call: types.CallbackQuery):
 
 async def unsubscribe_click_inline(call: types.CallbackQuery):
     # Set state
-    await UnsubscribeForm.channel.set()
+    await SubscribeForm.remove_channel.set()
 
     text = "Чтобы удалить канал, отправьте @упоминание или ссылку на него."
 
@@ -182,11 +179,11 @@ def setup(dp: Dispatcher):
     )
     dp.register_message_handler(
         process_subscribe_channel,
-        state=SubscribeForm.channel
+        state=SubscribeForm.add_channel
     )
     dp.register_message_handler(
         process_unsubscribe_channel,
-        state=UnsubscribeForm.channel
+        state=SubscribeForm.remove_channel
     )
 
     # Query handlers
