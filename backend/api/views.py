@@ -11,6 +11,7 @@ from telegram.serializers import (
     TelegramUserSerializer,
     TelegramChannelSerializer,
     TelegramMessageSerializer,
+    TelegramMediaSerializer,
     HistoryMessageSerializer,
     UserMessageRateSerializer,
     UserSubscribeSerializer,
@@ -174,6 +175,24 @@ class MessageViewset(viewsets.GenericViewSet):
 
         message.delete()
         return Response(status=status.HTTP_200_OK)
+
+    @action(
+        detail=False,
+        methods=["post"],
+        url_name="media",
+        url_path=r"(?P<channel_id>[\w-]+)/(?P<message_id>[\w-]+)/media",
+        serializer_class=TelegramMediaSerializer
+    )
+    def media(self, request, channel_id, message_id):
+        """Add media file id to `TelegramMessage` by `channel_id` and `message_id`"""
+        qs = self.get_queryset()
+        message = get_object_or_404(qs, channel_id=channel_id, message_id=message_id)
+        serializer = self.serializer_class(data=request.data, many=True)
+        if serializer.is_valid(raise_exception=False):
+            serializer.save(message_id=message.id)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class HistoryViewset(viewsets.GenericViewSet):
