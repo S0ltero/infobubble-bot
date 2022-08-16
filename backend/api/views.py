@@ -20,7 +20,7 @@ from telegram.serializers import (
 
 class UserViewset(viewsets.GenericViewSet):
     queryset = TelegramUser.objects.all()
-    serializer_class =TelegramUserSerializer
+    serializer_class = TelegramUserSerializer
 
     def get_queryset(self):
         qs = super().get_queryset()
