@@ -1,6 +1,7 @@
 import asyncio
 import re
 import os
+from pathlib import Path
 from itertools import zip_longest
 
 import aiohttp
@@ -142,6 +143,43 @@ async def start(message: types.Message):
     )
 
     await bot.send_message(message.chat.id, text, reply_markup=markup)
+
+
+@dp.callback_query_handler(lambda call: call.data == "help", state="*")
+async def help(call: types.CallbackQuery, state: FSMContext):
+    """
+        Handler for inline `help` button. Send help video by current user `state`
+    """
+    current_state = await state.get_state()
+
+    subscribe_form = subscriptions.SubscribeForm
+    filter_words_form = filter_words.FilterWordsForm
+
+    media_path = Path.cwd() / "static"/ "video"
+    media_help = types.InputFile(f"{media_path}/menu_remove_filter_word.mp4")
+
+    if current_state in subscribe_form.states_names:
+        if current_state == subscribe_form.add_channel.state:
+            media_path = media_path / "menu_add_subscribe.mp4"
+        elif current_state == subscribe_form.remove_channel.state:
+            media_path = media_path / "menu_remove_subscribe.mp4"
+    elif current_state in filter_words_form.states_names:
+        if current_state == filter_words_form.add_words.state:
+            media_path = media_path / "menu_add_filter_word.mp4"
+        elif current_state == filter_words_form.remove_words.state:
+            media_path = media_path / "menu_remove_filter_word.mp4"
+    elif current_state == filters.FiltersForm.filters.state:
+        media_path = media_path / "menu_filters.mp4"
+
+    media_help = types.InputFile(media_path)
+    help_message = await bot.send_video(
+        chat_id=call.message.chat.id,
+        video=media_help
+    )
+    await bot.answer_callback_query(call.id)
+
+    async with state.proxy() as data:
+        data["help_message"] = help_message
 
 
 @dp.callback_query_handler(lambda call: call.data == "start_subscribe")
