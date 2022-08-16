@@ -164,6 +164,16 @@ async def process_add_filter_words(message: types.Message, state: FSMContext):
 async def process_remove_filter_words(message: types.Message, state: FSMContext):
     user_id = message.from_user.id
 
+    async with state.proxy() as data:
+        prev_message: types.Message = data["message"]
+        await prev_message.delete()
+
+        if data.get("help_message"):
+            help_message: types.Message = data["help_message"]
+            await help_message.delete()
+
+    await message.delete()
+
     async with aiohttp.ClientSession() as session:
         async with session.get(url=f"{URL}/api/users/{user_id}/") as response:
             if response.status == 200:
