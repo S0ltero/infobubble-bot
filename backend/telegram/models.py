@@ -2,6 +2,8 @@ from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.db import models
+from django.db.models import Q
+from django.db.models.constraints import UniqueConstraint
 
 
 def validate_channel_url(value: str):
@@ -100,6 +102,17 @@ class TelegramMedia(models.Model):
     class Meta:
         verbose_name = "Медиа файл"
         verbose_name_plural = "Медиа файлы"
+        constraints = (
+            UniqueConstraint(
+                fields=("file_id",),
+                condition=Q(media_group_id=None),
+                name="unique_without_media_group"
+            ),
+            UniqueConstraint(
+                fields=("media_group_id", "file_id"),
+                name="unique_with_media_group"
+            ),
+        )
 
 
 class HistoryMessage(models.Model):
