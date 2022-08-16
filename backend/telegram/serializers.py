@@ -1,5 +1,5 @@
 from django.conf import settings
-from rest_framework import serializers
+from rest_framework import serializers, validators
 
 from .models import (
     TelegramUser,
@@ -55,6 +55,12 @@ class TelegramMessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = TelegramMessage
         fields = "__all__"
+        validators = (
+            validators.UniqueTogetherValidator(
+                queryset=TelegramMessage.objects.all(),
+                fields=("message_id", "channel")
+            ),
+        )
 
 
     def create(self, validated_data):
