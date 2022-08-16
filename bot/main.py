@@ -378,8 +378,6 @@ async def send_new_handler(call: types.CallbackQuery):
     await get_news(user)
 
 
-
-
 if __name__ == "__main__":
     subscriptions.setup(dp)
     filter_words.setup(dp)
