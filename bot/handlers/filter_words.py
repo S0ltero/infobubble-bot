@@ -77,8 +77,14 @@ async def add_filter_words(call: types.CallbackQuery, state: FSMContext):
             "Текущие слова фильтры: " + ", ".join(user["filter_words"])
         )
 
-    await bot.send_message(chat_id, text)
+    markup = types.InlineKeyboardMarkup()
+    markup.add(types.InlineKeyboardButton("Помощь", callback_data="help"))
+
     await bot.delete_message(chat_id, message_id)
+    message = await bot.send_message(chat_id, text=text, reply_markup=markup)
+
+    async with state.proxy() as data:
+        data["message"] = message
 
 
 async def remove_filter_words(call: types.CallbackQuery, state: FSMContext):
