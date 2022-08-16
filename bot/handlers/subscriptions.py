@@ -78,6 +78,9 @@ async def subscribe_click_inline(call: types.CallbackQuery, state: FSMContext):
         reply_markup=markup
     )
 
+    async with state.proxy() as data:
+        data["message"] = message
+
 
 async def unsubscribe_click_inline(call: types.CallbackQuery, state: FSMContext):
     # Set state
@@ -94,6 +97,9 @@ async def unsubscribe_click_inline(call: types.CallbackQuery, state: FSMContext)
         text=text,
         reply_markup=markup
     )
+
+    async with state.proxy() as data:
+        data["message"] = message
 
 
 async def process_subscribe_channel(message: types.Message, state: FSMContext):
