@@ -105,6 +105,17 @@ async def unsubscribe_click_inline(call: types.CallbackQuery, state: FSMContext)
 async def process_subscribe_channel(message: types.Message, state: FSMContext):
     user_id = message.from_user.id
     channel = await get_channel(message.text)
+
+    async with state.proxy() as data:
+        prev_message: types.Message = data["message"]
+        await prev_message.delete()
+
+        if data.get("help_message"):
+            help_message: types.Message = data["help_message"]
+            await help_message.delete()
+
+    await message.delete()
+
     if not channel:
         await state.finish()
         await bot.send_message(
@@ -156,6 +167,17 @@ async def process_subscribe_channel(message: types.Message, state: FSMContext):
 async def process_unsubscribe_channel(message: types.Message, state: FSMContext):
     user_id = message.from_user.id
     channel = await get_channel(message.text)
+
+    async with state.proxy() as data:
+        prev_message: types.Message = data["message"]
+        await prev_message.delete()
+
+        if data.get("help_message"):
+            help_message: types.Message = data["help_message"]
+            await help_message.delete()
+
+    await message.delete()
+
     if not channel:
         await state.finish()
         await bot.send_message(
