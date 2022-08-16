@@ -181,4 +181,4 @@ async def subscribe_news():
         for user in users:
             asyncio.ensure_future(get_news(user, is_subscribe=True))
 
-        await asyncio.sleep(5)
+        await asyncio.sleep(180)
