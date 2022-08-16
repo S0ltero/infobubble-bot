@@ -85,8 +85,15 @@ async def unsubscribe_click_inline(call: types.CallbackQuery, state: FSMContext)
 
     text = "Чтобы удалить канал, отправьте @упоминание или ссылку на него."
 
+    markup = types.InlineKeyboardMarkup()
+    markup.add(types.InlineKeyboardButton("Помощь", callback_data="help"))
+
     await bot.delete_message(call.message.chat.id, call.message.message_id)
-    await bot.send_message(call.message.chat.id, text)
+    message = await bot.send_message(
+        chat_id=call.message.chat.id,
+        text=text,
+        reply_markup=markup
+    )
 
 
 async def process_subscribe_channel(message: types.Message, state: FSMContext):
