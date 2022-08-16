@@ -59,7 +59,7 @@ class StartForm(StatesGroup):
 
 
 @dp.message_handler(commands=["start"])
-async def start(message):
+async def start(message: types.Message):
     """Инициируем добавление нового пользователя"""
     user_id = message.from_user.id
 
@@ -90,7 +90,7 @@ async def start(message):
 
 
 @dp.callback_query_handler(lambda call: call.data == "start_subscribe")
-async def start_subscribe(call):
+async def start_subscribe(call: types.CallbackQuery):
     # Set state
     await StartForm.channel.set()
 
@@ -229,7 +229,7 @@ async def filter_click_inline(call, state: FSMContext):
 
 
 @dp.callback_query_handler(lambda call: call.data == "complete", state="*")
-async def complete_click_inline(call, state: FSMContext):
+async def complete_click_inline(call: types.CallbackQuery, state: FSMContext):
     """Сохраняем пользователя и его фильтры в базу данных"""
     user_id = call.from_user.id
     chat_id = call.message.chat.id
@@ -298,7 +298,7 @@ async def complete_click_inline(call, state: FSMContext):
 
 
 @dp.callback_query_handler(lambda call: call.data.startswith("like"))
-async def on_like(call):
+async def on_like(call: types.CallbackQuery):
     user_id = call.from_user.id
     message_id = call.message.message_id
     channel_id = call.data.split("_")[1]
@@ -324,7 +324,7 @@ async def on_like(call):
 
 
 @dp.callback_query_handler(lambda call: call.data.startswith("nolike"))
-async def on_nolike(call):
+async def on_nolike(call: types.CallbackQuery):
     user_id = call.from_user.id
     message_id = call.message.message_id
     channel_id = call.data.split("_")[1]
@@ -350,7 +350,7 @@ async def on_nolike(call):
 
 
 @dp.callback_query_handler(lambda call: call.data == "next")
-async def next_news(call):
+async def next_news(call: types.CallbackQuery):
     user_id = call.from_user.id
     async with aiohttp.ClientSession() as session:
         async with session.get(url=f"{URL}/api/users/{user_id}/") as response:
@@ -364,7 +364,7 @@ async def next_news(call):
 
 @dp.callback_query_handler(lambda call: call.data == "news")
 @dp.message_handler(commands=["news"])
-async def send_new_handler(call):
+async def send_new_handler(call: types.CallbackQuery):
     user_id = call.from_user.id
     if isinstance(call, types.CallbackQuery):
         await bot.answer_callback_query(call.id)
