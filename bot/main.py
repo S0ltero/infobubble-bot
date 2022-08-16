@@ -20,6 +20,7 @@ from news import get_news, subscribe_news, day_news
 
 URL = os.getenv("DJANGO_HOST")
 API_TOKEN = os.getenv("TELEGRAM_TOKEN")
+SHARED_CHANNEL_ID = os.getenv("TELEGRAM_SHARED_CHANNEL_ID")
 
 bot = Bot(token=API_TOKEN)
 storage = MemoryStorage()
