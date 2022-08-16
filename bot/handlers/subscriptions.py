@@ -62,7 +62,7 @@ async def subscribes(call: types.CallbackQuery):
     )
 
 
-async def subscribe_click_inline(call: types.CallbackQuery):
+async def subscribe_click_inline(call: types.CallbackQuery, state: FSMContext):
     # Set state
     await SubscribeForm.add_channel.set()
 
@@ -72,7 +72,7 @@ async def subscribe_click_inline(call: types.CallbackQuery):
     await bot.send_message(call.message.chat.id, text)
 
 
-async def unsubscribe_click_inline(call: types.CallbackQuery):
+async def unsubscribe_click_inline(call: types.CallbackQuery, state: FSMContext):
     # Set state
     await SubscribeForm.remove_channel.set()
 
@@ -193,9 +193,11 @@ def setup(dp: Dispatcher):
     )
     dp.register_callback_query_handler(
         subscribe_click_inline,
-        lambda call: call.data == "subscribe"
+        lambda call: call.data == "subscribe",
+        state="*"
     )
     dp.register_callback_query_handler(
         unsubscribe_click_inline,
-        lambda call: call.data == "unsubscribe"
+        lambda call: call.data == "unsubscribe",
+        state="*"
     )
