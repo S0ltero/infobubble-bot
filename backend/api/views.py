@@ -156,10 +156,7 @@ class MessageViewset(viewsets.GenericViewSet):
     def create(self, request):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid(raise_exception=False):
-            try:
-                serializer.save()
-            except IntegrityError:
-                return Response("Данное сообщение уже существует", status=status.HTTP_400_BAD_REQUEST)
+            serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
