@@ -264,6 +264,9 @@ async def menu(message: types.Message, state: FSMContext):
         "❗️ Старт. Этот раздел позволяет получить очередное новостное сообщение по заданным Вами параметрам."
     )
 
+    if await state.get_state():
+        await state.finish()
+
     markup = types.InlineKeyboardMarkup()
     markup.row(
         types.InlineKeyboardButton("Подписки", callback_data="subscribes"),
