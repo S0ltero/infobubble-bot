@@ -240,8 +240,8 @@ async def process_start_channel(message: types.Message, state: FSMContext):
     await bot.send_message(chat_id=user_id, text=text, reply_markup=markup)
 
 
-@dp.message_handler(commands=["menu"])
-async def menu(message: types.Message):
+@dp.message_handler(commands=["menu"], state="*")
+async def menu(message: types.Message, state: FSMContext):
     text = (
         "Infobubble выполняет две основных функции: дает возможность собрать новостную ленту "
         "из интересующих Вас каналов и ленту с новостями по выбранным Вами фильтрам с источников, отобранных ИИ."
