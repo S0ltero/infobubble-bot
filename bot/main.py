@@ -116,7 +116,7 @@ async def shared_message_handler(message: types.Message):
 
 @dp.message_handler(commands=["start"])
 async def start(message: types.Message):
-    """Инициируем добавление нового пользователя"""
+    """Handle call `start` command and start initialize of new user"""
     user_id = message.from_user.id
 
     # Проверяем проходил ли пользователь настройку
@@ -230,6 +230,7 @@ async def process_start_channel(message: types.Message, state: FSMContext):
         types.InlineKeyboardButton("Далее", callback_data="next_filters"),
     )
     markup.add(types.InlineKeyboardButton("Сохранить", callback_data="complete"))
+    markup.add(types.InlineKeyboardButton("Помощь", callback_data="help"))
 
     text = (
         f"Отлично! Вы успешно подписались на канал {channel.mention}. "
@@ -242,6 +243,7 @@ async def process_start_channel(message: types.Message, state: FSMContext):
 
 @dp.message_handler(commands=["menu"], state="*")
 async def menu(message: types.Message, state: FSMContext):
+    """Handle call command `menu` and send message with inline menu"""
     text = (
         "Infobubble выполняет две основных функции: дает возможность собрать новостную ленту "
         "из интересующих Вас каналов и ленту с новостями по выбранным Вами фильтрам с источников, отобранных ИИ."
@@ -282,7 +284,11 @@ async def menu(message: types.Message, state: FSMContext):
 
 @dp.callback_query_handler(lambda call: call.data == "complete", state="*")
 async def complete_click_inline(call: types.CallbackQuery, state: FSMContext):
-    """Сохраняем пользователя и его фильтры в базу данных"""
+    """
+    Handle click to `complete` button of first initialization
+
+    Then save user and him filters to DB
+    """
     user_id = call.from_user.id
     chat_id = call.message.chat.id
     message_id = call.message.message_id
@@ -351,6 +357,7 @@ async def complete_click_inline(call: types.CallbackQuery, state: FSMContext):
 
 @dp.callback_query_handler(lambda call: call.data.startswith("like"))
 async def on_like(call: types.CallbackQuery):
+    """Handle query of click to like button"""
     user_id = call.from_user.id
 
     if call.message.reply_to_message:
@@ -387,6 +394,7 @@ async def on_like(call: types.CallbackQuery):
 
 @dp.callback_query_handler(lambda call: call.data.startswith("nolike"))
 async def on_nolike(call: types.CallbackQuery):
+    """Handle query of click to dislike button"""
     user_id = call.from_user.id
 
     if call.message.reply_to_message:
@@ -423,6 +431,7 @@ async def on_nolike(call: types.CallbackQuery):
 
 @dp.callback_query_handler(lambda call: call.data == "next")
 async def next_news(call: types.CallbackQuery):
+    """Handle query for sending next new"""
     user_id = call.from_user.id
     async with aiohttp.ClientSession() as session:
         async with session.get(url=f"{URL}/api/users/{user_id}/") as response:
@@ -437,6 +446,7 @@ async def next_news(call: types.CallbackQuery):
 @dp.callback_query_handler(lambda call: call.data == "news")
 @dp.message_handler(commands=["news"])
 async def send_new_handler(call: types.CallbackQuery):
+    """Handle user command or message with `news` text for getting news"""
     user_id = call.from_user.id
     if isinstance(call, types.CallbackQuery):
         await bot.answer_callback_query(call.id)
