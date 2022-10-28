@@ -229,7 +229,12 @@ class HistoryViewset(viewsets.GenericViewSet):
     queryset = HistoryMessage.objects.all()
     serializer_class = HistoryMessageSerializer
 
-    @action(methods=["get"], detail=False, url_path=r"(?P<user_id>[\w-]+)/(?P<channel_id>[\w-]+)/(?P<message_id>[\w-]+)", url_name="list")
+    @action(
+        methods=["get"],
+        detail=False,
+        url_path=r"(?P<user_id>[\w-]+)/(?P<channel_id>[\w-]+)/(?P<message_id>[\w-]+)",
+        url_name="list"
+    )
     def get_message(self, request, user_id, channel_id, message_id):
         qs = self.get_queryset()
         history_message = get_object_or_404(qs, user_id=user_id, channel_id=channel_id, message_id=message_id)
