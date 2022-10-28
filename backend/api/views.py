@@ -92,16 +92,13 @@ class UserViewset(viewsets.GenericViewSet):
 
     @action(detail=True, url_name="news-subscribe", url_path="news-subscribe")
     def news_subscribe(self, request, pk=None):
-        try:
-            qs = self.get_queryset()
-            user = qs.prefetch_related("subscribes").get(id=pk)
-        except TelegramUser.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
+        user = self.get_object()
         subscribes = user.subscribes.values_list("channel_id", flat=True)
 
-        news = TelegramMessage.objects.filter(channel__in=subscribes)
-        news = news.exclude(history__user_id=user.id)[:50]
+        news = TelegramMessage.objects.filter(
+            ~Q(history__in=user.history.all()),
+            channel__in=subscribes
+        )[:50]
 
         serializer = TelegramMessageSerializer(news, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
