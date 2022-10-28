@@ -3,7 +3,8 @@ import asyncio
 from datetime import datetime
 
 from aiogram import Bot
-from aiogram import types, exceptions
+from aiogram import types
+from aiogram.utils import exceptions
 
 import aiohttp
 from loguru import logger
@@ -94,35 +95,29 @@ async def send_new(user, message):
         else:
             data["text"] = message["text"]
             await bot.send_message(**data)
-    except (
-        exceptions.BotBlocked,
-        exceptions.RetryAfter,
-        exceptions.BadRequest,
-        exceptions.UserDeactivated,
-        exceptions.CantParseEntities
-    ) as e:
+    except exceptions.CantParseEntities as e:
+        logger.error(e)
+    except exceptions.BotBlocked:
+        return logger.error(f"Target [ID:{user_id}]: invalid user ID")
+    except exceptions.RetryAfter as e:
+        logger.error(f"Target [ID:{user_id}]: Flood limit is exceeded. Sleep {e.timeout} seconds.")
+        await asyncio.sleep(e.timeout)
+        return await send_new(user, message)  # Recursive call
+    except exceptions.UserDeactivated:
+        return logger.error(f"Targe [ID:{user_id}]: user is deactivated")
+    except exceptions.TelegramAPIError:
+        logger.error(f"Target [ID:{user_id}]: failed")
+    else:
+        # Save sended new to DB
+        history_data = {
+            "user": user_id,
+            "message": message["id"]
+        }
+
         async with aiohttp.ClientSession() as session:
-            if isinstance(e, exceptions.UserDeactivated):
-                async with session.delete(url=f"{URL}/api/users/{user_id}") as response:
-                    pass
-        if isinstance(e, exceptions.RetryAfter):
-            await asyncio.sleep(e.value)
-            await get_news(user)
-            return logger.error(e)
-
-        await get_news(user)
-        return logger.error(e)
-
-    # Сохраняем новость в базу данных
-    history_data = {
-        "user": user_id,
-        "message": message["id"]
-    }
-
-    async with aiohttp.ClientSession() as session:
-        async with session.post(url=f"{URL}/api/history/", json=history_data) as response:
-            if response.status != 201:
-                return logger.error(await response.text())
+            async with session.post(url=f"{URL}/api/history/", json=history_data) as response:
+                if response.status != 201:
+                    return logger.error(await response.text())
 
 
 async def get_news(user, is_subscribe=False):
