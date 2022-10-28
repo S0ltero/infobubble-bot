@@ -63,7 +63,7 @@ class TelegramMessage(models.Model):
         verbose_name_plural = "Сообщения"
         unique_together = ("message_id", "channel_id")
         indexes = (
-            models.Index(fields=["message_id", "channel"]),
+            models.Index(fields=["message_id", "channel", "date"]),
         )
 
 
