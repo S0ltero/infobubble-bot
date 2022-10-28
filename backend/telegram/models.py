@@ -7,6 +7,7 @@ from django.db.models.constraints import UniqueConstraint
 
 
 def validate_channel_url(value: str):
+    """Check if channel url is valid for Telegram use"""
     if not value.startswith('@'):
         raise ValidationError(
             f'{value} is not @username of telegram channel',
@@ -25,6 +26,7 @@ class TelegramUser(models.Model):
 
 
 class TelegramChannel(models.Model):
+    """Represent channel of Telegram"""
     channel_id = models.CharField(
         verbose_name="ID telegram канала",
         max_length=130,
@@ -52,6 +54,7 @@ class TelegramChannel(models.Model):
 
 
 class TelegramMessage(models.Model):
+    """Represetn message of Telegram"""
     message_id = models.CharField(verbose_name="ID сообщения", max_length=130)
     channel = models.ForeignKey(TelegramChannel, verbose_name="Канал сообщения", to_field="channel_id", on_delete=models.CASCADE)
     text = models.TextField(verbose_name="Текст сообщения", max_length=4096, blank=True)
@@ -68,6 +71,8 @@ class TelegramMessage(models.Model):
 
 
 class TelegramMedia(models.Model):
+    """Represent media files of Telegram"""
+
     class Type(models.TextChoices):
         AUDIO = "AUDIO"
         DOCUMENT = "DOCUMENT"
