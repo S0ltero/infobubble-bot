@@ -37,11 +37,13 @@ class UserViewset(viewsets.GenericViewSet):
         return qs
 
     def retrieve(self, request, pk=None):
+        """Get user with `pk`"""
         user = self.get_object()
         serializer = self.serializer_class(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def create(self, request):
+        """Create user by `request.data`"""
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid(raise_exception=False):
             serializer.save()
@@ -50,6 +52,7 @@ class UserViewset(viewsets.GenericViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def partial_update(self, request, pk=None):
+        """Partial update user with `pk`"""
         user = self.get_object()
         serializer = self.serializer_class(instance=user, data=request.data, partial=True)
         if serializer.is_valid(raise_exception=False):
@@ -59,17 +62,26 @@ class UserViewset(viewsets.GenericViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def list(self, request):
+        """Get list of users"""
         users = self.get_queryset()
         serializer = self.serializer_class(users, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def destroy(self, request, pk=None):
+        """Delete user with `pk`"""
         user = self.get_object()
         user.delete()
         return Response(status=status.HTTP_200_OK)
 
     @action(detail=True)
     def news(self, request, pk=None):
+        """Get list of news for user with `pk`
+
+        News filter by:
+            - Current user history
+            - Current datetime (Return only today news)
+            - Current user filters
+        """
         user = self.get_object()
 
         query = [
@@ -92,6 +104,12 @@ class UserViewset(viewsets.GenericViewSet):
 
     @action(detail=True, url_name="news-subscribe", url_path="news-subscribe")
     def news_subscribe(self, request, pk=None):
+        """Get list of news for user with `pk` from the user's subscription channels
+
+        News filter by:
+            - Current user history
+            - User's subscription channels
+        """
         user = self.get_object()
         subscribes = user.subscribes.values_list("channel_id", flat=True)
 
@@ -118,11 +136,13 @@ class ChannelViewset(viewsets.GenericViewSet):
         return qs
 
     def retrieve(self, request, pk=None):
+        """Get channel with `pk`"""
         channel = self.get_object()
         serializer = self.serializer_class(channel)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def create(self, request):
+        """Create channnel by `request.data`"""
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid(raise_exception=False):
             serializer.save()
@@ -131,6 +151,7 @@ class ChannelViewset(viewsets.GenericViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def partial_update(self, request, pk=None):
+        """Partial update channel with `pk`"""
         channel = self.get_object()
         serializer = self.serializer_class(channel, data=request.data, partial=True)
         if serializer.is_valid(raise_exception=False):
@@ -140,12 +161,14 @@ class ChannelViewset(viewsets.GenericViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def list(self, request, *args, **kwargs):
+        """Get list of channels"""
         channels = self.get_queryset()
         channels = channels.values_list("channel_url", "channel_id")
         return Response(channels, status=status.HTTP_200_OK)
 
     @action(detail=False, url_name="ids", url_path="ids")
     def ids(self, request):
+        """Get list of ids of channels"""
         qs = self.get_queryset()
         channel_ids = qs.values_list("channel_id", flat=True)
         return Response(channel_ids, status=status.HTTP_200_OK)
@@ -153,6 +176,7 @@ class ChannelViewset(viewsets.GenericViewSet):
 
     @action(detail=True)
     def subscribes(self, request, pk=None):
+        """Get list of subscribes to channel with `pk`"""
         try:
             channel = self.queryset.objects.get(channel_id=pk)
         except TelegramChannel.DoesNotExist:
@@ -167,11 +191,13 @@ class MessageViewset(viewsets.GenericViewSet):
     serializer_class = TelegramMessageSerializer
 
     def retrieve(self, request, pk=None):
+        """Get message with `pk`"""
         message = self.get_queryset()
         serializer = self.serializer_class(message)
         return Response(serializer.data["subscribes"], status=status.HTTP_200_OK)
 
     def create(self, request):
+        """Create message by `request.data`"""
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid(raise_exception=False):
             serializer.save()
@@ -236,12 +262,14 @@ class HistoryViewset(viewsets.GenericViewSet):
         url_name="list"
     )
     def get_message(self, request, user_id, channel_id, message_id):
+        """Get history message by `user_id`, `channel_id` and `message_id`"""
         qs = self.get_queryset()
         history_message = get_object_or_404(qs, user_id=user_id, channel_id=channel_id, message_id=message_id)
         serializer = self.serializer_class(history_message)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def create(self, request):
+        """Create history message by `request.data`"""
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid(raise_exception=False):
             serializer.save()
