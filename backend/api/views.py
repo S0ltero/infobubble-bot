@@ -1,3 +1,8 @@
+import operator
+from functools import reduce
+
+from django.db.models import Q
+from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework import status
@@ -66,11 +71,21 @@ class UserViewset(viewsets.GenericViewSet):
     @action(detail=True)
     def news(self, request, pk=None):
         user = self.get_object()
-        news = TelegramMessage.objects.filter(channel__tags__overlap=user.filters)
-        news = news.exclude(history__user_id=user.id)
-        for word in user.filter_words:
-            news.exclude(text__contains=word)
-        news = news[:50]
+
+        query = [
+            ~Q(history__in=user.history.all()) &
+            Q(date__gte=timezone.now().replace(hour=0, minute=0, second=0)) &
+            Q(channel__tags__overlap=user.filters)
+        ]
+
+        if user.filter_words:
+            query.append(
+                reduce(
+                    operator.and_, [~Q(text__icontains=s) for s in user.filter_words]
+                )
+            )
+
+        news = TelegramMessage.objects.filter(*query)[:50]
 
         serializer = TelegramMessageSerializer(news, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
