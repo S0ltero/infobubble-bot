@@ -130,6 +130,7 @@ async def process_subscribe_channel(message: types.Message, state: FSMContext):
         await bot.send_message(
             chat_id=message.chat.id, text="К сожалению, указанный канал не найден."
         )
+        return
 
     async with aiohttp.ClientSession() as session:
         data = {
