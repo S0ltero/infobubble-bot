@@ -198,7 +198,7 @@ async def process_start_channel(message: types.Message, state: FSMContext):
     user_id = message.from_user.id
     channel = await get_channel(message.text)
     if not channel:
-        await bot.send_message(
+        return await bot.send_message(
             chat_id=message.chat.id,
             text="Указанное значение не является @упоминанием или ссылкой на канал. Пожалуйста, попробуйте ввести другое значение.",
         )
@@ -206,7 +206,7 @@ async def process_start_channel(message: types.Message, state: FSMContext):
     try:
         channel = await bot.get_chat(channel)
     except ChatNotFound:
-        await bot.send_message(
+        return await bot.send_message(
             chat_id=message.chat.id, text="К сожалению, указанный канал не найден. Пожалуйста, попробуйте указать другой канал."
         )
 
