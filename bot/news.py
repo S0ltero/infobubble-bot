@@ -153,10 +153,13 @@ async def get_news(user, is_subscribe=False):
         try:
             message = user_news[user_id].pop()
         except IndexError:
-            await bot.send_message(
-                user_id, "На данный момент новостей нет, повторите попытку позже."
-            )
-            return
+            try:
+                await bot.send_message(
+                    user_id, "На данный момент новостей нет, повторите попытку позже."
+                )
+                return
+            except exceptions.BotBlocked as e:
+                return logger.error(e)
 
     await send_new(user, message)
 
