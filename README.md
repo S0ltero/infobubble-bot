@@ -1,10 +1,10 @@
 # InfoBubble Bot
 
-**ENG:** This project implements a bot that allows users to filter their news feed based on their preferences using filters and a channel subscription system.This project represent functional of bThis project implements a bot that allows users to filter their news feed based on their preferences using filters and a channel subscription system.
+**ENG:** This project implements a bot that allows users to filter their news feed based on their preferences using filters and a channel subscription system.
 
 ---
 
-**RUS:** Данный проект реализует бота который позволяет пользователям фильтровать их новостную ленту на основе их предпочтений с помощью фильтров и системы подписки на каналыДанный проект реализует бота который позволяет пользователям фильтровать их новостную ленту на основе их предпочтений с помощью фильтров и системы подписки на каналы
+**RUS:** Данный проект реализует бота который позволяет пользователям фильтровать их новостную ленту на основе их предпочтений с помощью фильтров и системы подписки на каналы.
 
 ##### Bot Service:
 
